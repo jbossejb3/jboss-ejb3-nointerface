@@ -1,0 +1,85 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  
+
+  <!-- POM Model Version -->
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- Artifact Information -->
+  <groupId>org.jboss.ejb3.nointerface</groupId>
+  <artifactId>nointerface-spi</artifactId>
+  <packaging>jar</packaging>
+  <version>1.0.0-SNAPSHOT</version>
+  <name>JBoss EJB3 No-Interface view SPI</name>
+  <url>http://labs.jboss.com/jbossejb3</url>
+  <description>SPI for JBoss EJB3 No-Interface view</description>
+
+
+  <properties>
+	  <version.metadata_ejb>2.0.0-alpha-5</version.metadata_ejb>
+  </properties>
+  
+  <build>
+ 
+
+   <plugins>
+        <!-- We have a dependency on @LocalBean which comes from ejb3-api (=JDK6) -->
+        <plugin>
+            <artifactId>maven-enforcer-plugin</artifactId>
+	    <executions>
+		    <!--  Enforce JDK6 -->
+		    <execution>
+			    <id>enforce-jdk6</id>
+			    <goals>
+				    <goal>enforce</goal>
+			    </goals>
+			    <configuration>
+				    <rules>
+					    <requireJavaVersion>
+						    <version>1.6</version>
+					    </requireJavaVersion>
+				    </rules>
+			    </configuration>
+		    </execution>
+            </executions>
+        </plugin>
+
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <!-- Use Java6 -->
+              <forkMode>once</forkMode>
+              <jvm>${JAVA_HOME}/bin/java</jvm>
+                <argLine>-Dxb.builder.useUnorderedSequence=true</argLine>
+            </configuration>
+        </plugin>
+
+
+        <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <source>1.6</source>
+              <target>1.6</target>
+              <executable>${JAVA_HOME}/bin/javac</executable>
+            </configuration>
+        </plugin>
+
+    </plugins>
+
+  </build>
+
+
+ <!-- Dependencies -->
+  <dependencies>
+
+
+   <!--  JBoss Metadata -->
+   <dependency>
+      <groupId>org.jboss.metadata</groupId>
+      <artifactId>jboss-metadata-ejb</artifactId>
+      <version>${version.metadata_ejb}</version>
+    </dependency>
+
+  </dependencies>
+</project>
