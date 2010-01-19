@@ -1,0 +1,258 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <!-- Parent -->
+  <parent>
+	<groupId>org.jboss.ejb3.nointerface</groupId>
+	<artifactId>jboss-ejb3-nointerface-build</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+  </parent>
+	
+  <!-- POM Model Version -->
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- Artifact Information -->
+  <groupId>org.jboss.ejb3.nointerface</groupId>
+  <artifactId>jboss-ejb3-nointerface-impl</artifactId>
+  <packaging>jar</packaging>
+  <version>1.0.0-SNAPSHOT</version>
+  <name>JBoss EJB 3.1 Implementation of the no-interface view</name>
+  <url>http://labs.jboss.com/jbossejb3</url>
+  <description>A JBossMC based no-interface implementation for EJB3.1 beans (As defined by section 3.4.4 in EJB3.1 spec)</description>
+
+  <properties>
+	  <version.nointerface.spi>1.0.0-SNAPSHOT</version.nointerface.spi>
+      <version.org.jboss.deployers>2.0.8.GA</version.org.jboss.deployers>
+      <version.org.jboss.ejb3_deployers>1.1.0</version.org.jboss.ejb3_deployers>
+      <version.org.jboss.microcontainer>2.0.8.GA</version.org.jboss.microcontainer>
+      <version.org.jboss_jbossxb>2.0.1.GA</version.org.jboss_jbossxb>
+      <version.javassist>3.7.1.GA</version.javassist>
+      <version.org.jboss.ejb3_jboss-ejb3-test>1.0.0</version.org.jboss.ejb3_jboss-ejb3-test>
+      <version.metadata_ejb>2.0.0-alpha-5</version.metadata_ejb>
+      <version.metadata_ear>2.0.0.Alpha</version.metadata_ear>
+  </properties>
+
+ <build>
+ 
+
+   <plugins>
+        <!-- We have a dependency on @LocalBean which comes from ejb3-api (=JDK6) -->
+        <plugin>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-jdk6</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireProperty>
+                      <property>env.JDK6_HOME</property>
+                      <message>JDK6_HOME is not set</message>
+                    </requireProperty>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+        </plugin>
+
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+            
+              <!-- Use Java6 -->
+              <forkMode>once</forkMode>
+              <jvm>${JDK6_HOME}/bin/java</jvm>
+                <argLine>-Dxb.builder.useUnorderedSequence=true</argLine>
+            </configuration>
+        </plugin>
+
+
+        <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <source>1.6</source>
+              <target>1.6</target>
+              <executable>${JDK6_HOME}/bin/javac</executable>
+            </configuration>
+        </plugin>
+
+        <!-- Code coverage tool -->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>cobertura-maven-plugin</artifactId>
+            <!-- version 2.0 is intentional since other (later) version
+            seems to generate reports showing 0% coverage for all -->
+            <version>2.0</version>
+        </plugin>
+
+    </plugins>
+
+  </build>
+
+
+ <!-- Dependencies -->
+  <dependencies>
+
+	  <!-- nointerface spi -->
+	<dependency>
+		<groupId>org.jboss.ejb3.nointerface</groupId>
+		<artifactId>jboss-ejb3-nointerface-spi</artifactId>
+		<version>${version.nointerface.spi}</version>
+	</dependency>
+
+    
+
+    
+    <!-- MC -->
+    <dependency>
+      <groupId>org.jboss.microcontainer</groupId>
+      <artifactId>jboss-kernel</artifactId>
+      <version>${version.org.jboss.microcontainer}</version>
+    </dependency>
+
+
+  <!-- Javassist  -->
+    <dependency>
+      <groupId>javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <version>${version.javassist}</version>
+    </dependency>
+
+  <!-- JBoss logging -->
+   <dependency>
+        <groupId>org.jboss.logging</groupId>
+        <artifactId>jboss-logging-spi</artifactId>
+    </dependency>
+
+   <!--  JBoss Metadata -->
+   <dependency>
+      <groupId>org.jboss.metadata</groupId>
+      <artifactId>jboss-metadata-ejb</artifactId>
+      <version>${version.metadata_ejb}</version>
+      <exclusions>
+        <exclusion>
+            <groupId>org.jboss</groupId>
+            <artifactId>jbossxb</artifactId>
+        </exclusion>
+        <exclusion>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-mdr</artifactId>
+        </exclusion>
+        <exclusion>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-reflect</artifactId>
+        </exclusion>
+        <exclusion>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-vfs</artifactId>
+        </exclusion>
+
+      </exclusions>
+    </dependency>
+    
+    <!-- JBoss EAR metadata 
+        TODO: Try to avoid this. This is only needed (currently)
+        in the EJB3NoInterfaceDeployer which uses JBossAppMetaData to
+        check whether a deployment is an ear file
+     -->
+    <dependency>
+      <groupId>org.jboss.metadata</groupId>
+      <artifactId>jboss-metadata-ear</artifactId>
+      <version>${version.metadata_ear}</version>
+      <exclusions>
+        <exclusion>
+            <groupId>org.jboss</groupId>
+            <artifactId>jbossxb</artifactId>
+        </exclusion>
+        <exclusion>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-mdr</artifactId>
+        </exclusion>
+        <exclusion>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-reflect</artifactId>
+        </exclusion>
+        <exclusion>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-vfs</artifactId>
+        </exclusion>
+
+      </exclusions>
+    </dependency>
+
+    <!-- JBoss deployers -->
+    <dependency>
+      <groupId>org.jboss.deployers</groupId>
+      <artifactId>jboss-deployers-core-spi</artifactId>
+      <version>${version.org.jboss.deployers}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.deployers</groupId>
+      <artifactId>jboss-deployers-impl</artifactId>
+      <version>${version.org.jboss.deployers}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.deployers</groupId>
+      <artifactId>jboss-deployers-vfs</artifactId>
+      <version>${version.org.jboss.deployers}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.deployers</groupId>
+      <artifactId>jboss-deployers-structure-spi</artifactId>
+      <version>${version.org.jboss.deployers}</version>
+    </dependency>
+
+    
+    <dependency>
+      <groupId>org.jboss.ejb3</groupId>
+      <artifactId>jboss-ejb3-endpoint</artifactId>
+      <version>0.1.0</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.jboss.ejb3</groupId>
+      <artifactId>jboss-ejb3-deployers</artifactId>
+      <version>${version.org.jboss.ejb3_deployers}</version>
+      <exclusions>
+        <exclusion>
+            <groupId>org.jboss.metadata</groupId>
+            <artifactId>jboss-metadata</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+
+      <!-- The EJB3.1 API support (ex: @LocalBean) -->
+      <dependency>
+       <groupId>org.jboss.javaee</groupId>
+       <artifactId>jboss-ejb-api_3.1</artifactId>
+       <version>1.0-alpha-1</version>
+      </dependency>
+
+    
+        <dependency>
+          <groupId>org.jboss.naming</groupId>
+          <artifactId>jnp-client</artifactId>
+          <version>5.0.0.GA</version>
+        </dependency>
+
+	<!-- JUnit support -->
+	<dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+		<scope>test</scope>
+	</dependency>
+	
+	<!-- Test support from jboss-ejb3-test -->
+	<dependency>
+		<groupId>org.jboss.ejb3</groupId>
+		<artifactId>jboss-ejb3-test</artifactId>
+		<version>${version.org.jboss.ejb3_jboss-ejb3-test}</version>
+		<scope>test</scope>
+    	</dependency>
+
+        
+    </dependencies>
+</project>
