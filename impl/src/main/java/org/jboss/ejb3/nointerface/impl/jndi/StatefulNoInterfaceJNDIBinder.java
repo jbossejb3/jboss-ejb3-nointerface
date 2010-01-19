@@ -57,7 +57,6 @@ public class StatefulNoInterfaceJNDIBinder extends AbstractNoInterfaceViewJNDIBi
     */
    private static final String NO_INTERFACE_STATEFUL_PROXY_FACTORY_JNDI_NAME_SUFFIX = "/no-interface-stateful-proxyfactory";
 
-
    /**
     * Constructor
     * @param beanClass The bean class
@@ -90,8 +89,8 @@ public class StatefulNoInterfaceJNDIBinder extends AbstractNoInterfaceViewJNDIBi
 
       // This factory will be bound to JNDI and will be invoked (through an objectfactory) to create
       // the no-interface view for a SFSB
-      StatefulNoInterfaceViewFacade statefulNoInterfaceViewFactory = new StatefulNoInterfaceViewFacade(
-            beanClass, this.endpointContext);
+      StatefulNoInterfaceViewFacade statefulNoInterfaceViewFactory = new StatefulNoInterfaceViewFacade(beanClass,
+            this.endpointContext);
 
       // TODO - Needs to be a proper jndi name for the factory
       String statefulProxyFactoryJndiName = beanMetaData.getEjbName()
@@ -111,8 +110,10 @@ public class StatefulNoInterfaceJNDIBinder extends AbstractNoInterfaceViewJNDIBi
       reference.add(refAddr);
 
       String noInterfaceJndiName = this.getJNDINameResolver(beanMetaData).resolveNoInterfaceJNDIName(beanMetaData);
+      // log the jndi binding information 
+      this.prettyPrintJNDIBindingInfo(beanMetaData, noInterfaceJndiName);
+      // bind to jndi
       jndiCtx.bind(noInterfaceJndiName, reference);
-      logger.info("Bound the no-interface view for bean " + beanClass + " to jndi at " + noInterfaceJndiName);
 
       return noInterfaceJndiName;
 

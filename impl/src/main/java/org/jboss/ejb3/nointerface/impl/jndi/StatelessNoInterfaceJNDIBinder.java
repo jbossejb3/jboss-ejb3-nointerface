@@ -87,11 +87,13 @@ public class StatelessNoInterfaceJNDIBinder extends AbstractNoInterfaceViewJNDIB
       {
          throw new RuntimeException("Could not create no-interface view for bean class: " + beanClass, e);
       }
-      // bind
+      // get no-interface view jndi name
       String noInterfaceJndiName = this.getJNDINameResolver(beanMetaData).resolveNoInterfaceJNDIName(beanMetaData);
+      // log the no-interface view jndi binding info
+      this.prettyPrintJNDIBindingInfo(beanMetaData, noInterfaceJndiName);
+      // bind to jndi
       NonSerializableFactory.rebind(jndiCtx, noInterfaceJndiName, noInterfaceView, true);
-
-      logger.info("Bound the no-interface view for bean " + beanClass + " to jndi at " + noInterfaceJndiName);
+      
       return noInterfaceJndiName;
    }
 

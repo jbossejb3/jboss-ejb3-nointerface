@@ -24,6 +24,7 @@ package org.jboss.ejb3.nointerface.impl.jndi;
 import org.jboss.ejb3.nointerface.impl.invocationhandler.NoInterfaceViewInvocationHandler;
 import org.jboss.ejb3.nointerface.spi.jndi.NoInterfaceViewJNDIBinder;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
+import org.jboss.logging.Logger;
 import org.jboss.metadata.ejb.jboss.JBossSessionBean31MetaData;
 import org.jboss.metadata.ejb.jboss.jndi.resolver.impl.JNDIPolicyBasedJNDINameResolverFactory;
 import org.jboss.metadata.ejb.jboss.jndi.resolver.spi.SessionBean31JNDINameResolver;
@@ -39,6 +40,11 @@ import org.jboss.metadata.ejb.jboss.jndipolicy.spi.DefaultJndiBindingPolicy;
 public abstract class AbstractNoInterfaceViewJNDIBinder implements NoInterfaceViewJNDIBinder
 {
 
+   /**
+    * Logger
+    */
+   private static Logger logger = Logger.getLogger(AbstractNoInterfaceViewJNDIBinder.class);
+   
    /**
     * The endpoint context which will be used while creating the {@link NoInterfaceViewInvocationHandler}
     */
@@ -82,4 +88,21 @@ public abstract class AbstractNoInterfaceViewJNDIBinder implements NoInterfaceVi
       return JNDIPolicyBasedJNDINameResolverFactory.getJNDINameResolver(sessionBean, jndiBindingPolicy);
    }
 
+   /**
+    * Utility method to log the jndi name, to which the no-interface view of the bean represented
+    * by the <code>sessionBean<code>, will be bound.
+    * 
+    * @param sessionBeanMetaData Session bean metadata
+    * @param noInterfaceViewJNDIName The jndi name to which the no-interface view will be bound
+    */
+   protected void prettyPrintJNDIBindingInfo(JBossSessionBean31MetaData sessionBeanMetaData, String noInterfaceViewJNDIName)
+   {
+      StringBuffer sb = new StringBuffer();
+      sb.append("Binding the following entry in Global JNDI:\n\n");
+      sb.append("\t");
+      sb.append(noInterfaceViewJNDIName);
+      sb.append(" - EJB3.1 no-interface view\n");
+      
+      logger.info(sb);
+   }
 }
