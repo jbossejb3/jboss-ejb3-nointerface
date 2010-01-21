@@ -19,38 +19,48 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.ejb3.nointerface.test.viewcreator;
+package org.jboss.ejb3.nointerface.impl.test.factory;
 
-import javax.ejb.Stateless;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.io.Serializable;
 
-import org.jboss.logging.Logger;
+import javax.ejb.Stateful;
 
 /**
- * SimpleSLSBWithoutInterface
+ * SimpleSFSBeanWithoutInterfaces
+ * 
+ * Used in testing of no-interface view. Although the name suggests
+ * this bean does not implement any interfaces, it does however implement
+ * {@link Serializable} and {@link Externalizable} which are allowed by 
+ * spec for no-interface view.
  *
  * @author Jaikiran Pai
  * @version $Revision: $
  */
-@Stateless
-public class SimpleSLSBWithoutInterface
+@Stateful
+public class SimpleSFSBeanWithoutInterfaces implements Serializable, Externalizable
 {
 
-   /**
-    * Logger
-    */
-   private static Logger logger = Logger.getLogger(SimpleSLSBWithoutInterface.class);
+   public static final int INITIAL_QTY = 2;
 
-   public Object container;
+   private int qtyPurchased = INITIAL_QTY;
 
-   public void simplePublicMethod()
+   public int getQtyPurchased()
    {
-      // do nothing
+      return this.qtyPurchased;
    }
 
-   private void somePrivateMethod()
+   public void incrementPurchaseQty()
    {
-      // do nothing
+      this.qtyPurchased++;
+   }
 
+   public void incrementPurchaseQty(int qty)
+   {
+      this.qtyPurchased += qty;
    }
 
    public static void someStaticMethod()
@@ -58,24 +68,15 @@ public class SimpleSLSBWithoutInterface
       // do nothing
    }
 
-   public String sayHi(String name)
+   public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException
    {
-      return "Hi " + name;
+      // do nothing
+
    }
 
-   //   @Override
-   //   public String toString()
-   //   {
-   //      return "Test - " + this.getClass().getName();
-   //   }
-
-   public final String someFinalMethod()
+   public void writeExternal(ObjectOutput out) throws IOException
    {
-      return "someFinalMethod";
-   }
+      // do nothing
 
-   public static final int someStaticFinalMethod(int number)
-   {
-      return number;
    }
 }

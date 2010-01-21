@@ -19,33 +19,62 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.ejb3.nointerface.test.viewcreator;
+package org.jboss.ejb3.nointerface.impl.test.factory;
 
 import javax.ejb.Stateless;
 
+import org.jboss.logging.Logger;
+
 /**
- * ChildBean
+ * SimpleSLSBWithoutInterface
  *
  * @author Jaikiran Pai
  * @version $Revision: $
  */
 @Stateless
-public class ChildBean extends AbstractSimpleBase
+public class SimpleSLSBWithoutInterface
 {
 
-   @Override
-   public String sayHiFromChild(String name)
+   /**
+    * Logger
+    */
+   private static Logger logger = Logger.getLogger(SimpleSLSBWithoutInterface.class);
+
+   public Object container;
+
+   public void simplePublicMethod()
    {
-      return "Hi from " + ChildBean.class.getName() + " to user " + name;
+      // do nothing
    }
 
    private void somePrivateMethod()
    {
       // do nothing
+
    }
 
+   public static void someStaticMethod()
+   {
+      // do nothing
+   }
 
-   public int echoNumberFromChild(int number)
+   public String sayHi(String name)
+   {
+      return "Hi " + name;
+   }
+
+   //   @Override
+   //   public String toString()
+   //   {
+   //      return "Test - " + this.getClass().getName();
+   //   }
+
+   public final String someFinalMethod()
+   {
+      return "someFinalMethod";
+   }
+
+   public static final int someStaticFinalMethod(int number)
    {
       return number;
    }

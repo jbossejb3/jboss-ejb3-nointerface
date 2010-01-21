@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.jboss.ejb3.nointerface.test.viewcreator;
+package org.jboss.ejb3.nointerface.impl.test.factory;
 
 import java.io.Externalizable;
 import java.io.IOException;

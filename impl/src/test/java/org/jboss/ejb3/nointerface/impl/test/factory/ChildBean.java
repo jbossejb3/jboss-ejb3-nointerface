@@ -19,39 +19,34 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.ejb3.nointerface.test.viewcreator;
+package org.jboss.ejb3.nointerface.impl.test.factory;
+
+import javax.ejb.Stateless;
 
 /**
- * AbstractSimpleBase
+ * ChildBean
  *
  * @author Jaikiran Pai
  * @version $Revision: $
  */
-public abstract class AbstractSimpleBase
+@Stateless
+public class ChildBean extends AbstractSimpleBase
 {
 
-   private String someString;
-
-   public String sayHiFromBase(String user)
+   @Override
+   public String sayHiFromChild(String name)
    {
-      return "Hi from base, to user " + user;
+      return "Hi from " + ChildBean.class.getName() + " to user " + name;
    }
 
-   public static void someStaticMethod()
+   private void somePrivateMethod()
    {
       // do nothing
    }
 
-   @Override
-   public String toString()
+
+   public int echoNumberFromChild(int number)
    {
-      return "AbstractSimpleBase";
-   }
-
-   public abstract String sayHiFromChild(String name);
-
-   public final void someFinalMethod()
-   {
-
+      return number;
    }
 }

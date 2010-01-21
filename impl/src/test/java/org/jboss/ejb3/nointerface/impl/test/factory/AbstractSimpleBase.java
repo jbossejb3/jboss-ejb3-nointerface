@@ -19,48 +19,22 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.ejb3.nointerface.test.viewcreator;
-
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.Serializable;
-
-import javax.ejb.Stateful;
+package org.jboss.ejb3.nointerface.impl.test.factory;
 
 /**
- * SimpleSFSBeanWithoutInterfaces
- * 
- * Used in testing of no-interface view. Although the name suggests
- * this bean does not implement any interfaces, it does however implement
- * {@link Serializable} and {@link Externalizable} which are allowed by 
- * spec for no-interface view.
+ * AbstractSimpleBase
  *
  * @author Jaikiran Pai
  * @version $Revision: $
  */
-@Stateful
-public class SimpleSFSBeanWithoutInterfaces implements Serializable, Externalizable
+public abstract class AbstractSimpleBase
 {
 
-   public static final int INITIAL_QTY = 2;
+   private String someString;
 
-   private int qtyPurchased = INITIAL_QTY;
-
-   public int getQtyPurchased()
+   public String sayHiFromBase(String user)
    {
-      return this.qtyPurchased;
-   }
-
-   public void incrementPurchaseQty()
-   {
-      this.qtyPurchased++;
-   }
-
-   public void incrementPurchaseQty(int qty)
-   {
-      this.qtyPurchased += qty;
+      return "Hi from base, to user " + user;
    }
 
    public static void someStaticMethod()
@@ -68,15 +42,16 @@ public class SimpleSFSBeanWithoutInterfaces implements Serializable, Externaliza
       // do nothing
    }
 
-   public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException
+   @Override
+   public String toString()
    {
-      // do nothing
-
+      return "AbstractSimpleBase";
    }
 
-   public void writeExternal(ObjectOutput out) throws IOException
+   public abstract String sayHiFromChild(String name);
+
+   public final void someFinalMethod()
    {
-      // do nothing
 
    }
 }

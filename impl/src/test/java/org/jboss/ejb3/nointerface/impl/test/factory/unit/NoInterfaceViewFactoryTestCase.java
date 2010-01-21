@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.ejb3.nointerface.test.factory.unit;
+package org.jboss.ejb3.nointerface.impl.test.factory.unit;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -28,10 +28,10 @@ import static org.junit.Assert.fail;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+import org.jboss.ejb3.nointerface.impl.test.factory.SimpleSFSBeanWithoutInterfaces;
+import org.jboss.ejb3.nointerface.impl.test.factory.SimpleSLSBWithoutInterface;
 import org.jboss.ejb3.nointerface.impl.view.factory.JavassistNoInterfaceViewFactory;
 import org.jboss.ejb3.nointerface.spi.view.factory.NoInterfaceViewFactory;
-import org.jboss.ejb3.nointerface.test.viewcreator.SimpleSFSBeanWithoutInterfaces;
-import org.jboss.ejb3.nointerface.test.viewcreator.SimpleSLSBWithoutInterface;
 import org.jboss.logging.Logger;
 import org.junit.Test;
 
