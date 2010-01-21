@@ -19,7 +19,7 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.ejb3.nointerface.impl.metadata.temp;
+package org.jboss.ejb3.nointerface.impl.metadata.processor;
 
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.ejb3.deployers.metadata.processor.JBossMetaDataProcessorFactory;
