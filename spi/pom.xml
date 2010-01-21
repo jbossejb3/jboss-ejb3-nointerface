@@ -16,6 +16,7 @@
     <groupId>org.jboss.ejb3.nointerface</groupId>
     <artifactId>jboss-ejb3-nointerface-spi</artifactId>
     <packaging>jar</packaging>
+    <version>1.0.0-SNAPSHOT</version>
     <name>JBoss EJB3 No-Interface view SPI</name>
     <url>http://labs.jboss.com/jbossejb3</url>
     <description>SPI for JBoss EJB3 No-Interface view</description>
