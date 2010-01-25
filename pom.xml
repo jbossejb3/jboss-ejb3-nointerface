@@ -40,8 +40,9 @@
 
     <!-- Aggregate Modules -->
     <modules>
-        <module>spi</module>
+        <!--  Order matters -->
         <module>build</module>
+        <module>spi</module>
         <module>impl</module>
     </modules>
 
