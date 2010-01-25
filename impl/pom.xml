@@ -14,7 +14,6 @@
     <groupId>org.jboss.ejb3.nointerface</groupId>
     <artifactId>jboss-ejb3-nointerface-impl</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0-SNAPSHOT</version>
     <name>JBoss EJB 3.1 Implementation of the no-interface view</name>
     <url>http://labs.jboss.com/jbossejb3</url>
     <description>A JBossMC based no-interface implementation for EJB3.1 beans (As defined by section 3.4.4 in EJB3.1 spec)</description>
