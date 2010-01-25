@@ -19,7 +19,6 @@
     <description>A JBossMC based no-interface implementation for EJB3.1 beans (As defined by section 3.4.4 in EJB3.1 spec)</description>
 
     <properties>
-        <version.nointerface.spi>${project.version}</version.nointerface.spi>
         <version.org.jboss.deployers>2.0.8.GA</version.org.jboss.deployers>
         <version.org.jboss.ejb3_deployers>1.1.0</version.org.jboss.ejb3_deployers>
         <version.org.jboss.microcontainer>2.0.8.GA</version.org.jboss.microcontainer>
@@ -37,7 +36,7 @@
         <dependency>
             <groupId>org.jboss.ejb3.nointerface</groupId>
             <artifactId>jboss-ejb3-nointerface-spi</artifactId>
-            <version>${version.nointerface.spi}</version>
+            <version>${project.version}</version>
         </dependency>
 
 
