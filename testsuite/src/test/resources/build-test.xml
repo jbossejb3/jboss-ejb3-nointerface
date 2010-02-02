@@ -11,7 +11,7 @@
   	<property name="location.packagemanager" value="${location.dependencies}/package-manager"/>
 	<property name="location.packagemanager.zip.file" value="${location.packagemanager}/jboss-ejb3-package-manager-installer.zip"/>
   	<property name="location.nointerface.package" value="${location.dependencies}/package"/>
-	<property name="location.nointerface.package.file" value="${location.nointerface.package}/jboss-ejb3-nointerface-package.jar"/>
+	<property name="location.nointerface.package.file" value="${location.nointerface.package}/jboss-ejb3-nointerface-impl-package.jar"/>
 	<property name="packagemanager.home" value="${location.packagemanager}/jboss-package-manager"/>
 
 	<path id="package.manager.classpath">

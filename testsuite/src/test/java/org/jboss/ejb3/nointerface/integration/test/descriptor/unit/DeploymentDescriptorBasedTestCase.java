@@ -21,6 +21,7 @@
 */
 package org.jboss.ejb3.nointerface.integration.test.descriptor.unit;
 
+import java.io.File;
 import java.net.URL;
 
 import javax.naming.Context;
@@ -62,7 +63,8 @@ public class DeploymentDescriptorBasedTestCase extends AbstractNoInterfaceTestCa
    public void before() throws Exception
    {
       String jarName = "dd-based-nointerface.jar";
-      deployment = buildSimpleJar(jarName, DDBasedNoInterfaceViewSLSB.class.getPackage());
+      File jar = buildSimpleJar(jarName, DDBasedNoInterfaceViewSLSB.class.getPackage());
+      this.deployment = jar.toURI().toURL();
       this.redeploy(deployment);
    }
 

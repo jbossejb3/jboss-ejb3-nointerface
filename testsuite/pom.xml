@@ -13,7 +13,7 @@
 
     <groupId>org.jboss.ejb3.nointerface</groupId>
     <artifactId>jboss-ejb3-nointerface-testsuite</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+
 
     <name>JBoss EJB3.1 no-interface Testsuite</name>
     <description>Testsuite for JBoss EJB3.1 no-interface component</description>
@@ -140,15 +140,15 @@
                                     <outputDirectory>${project.build.directory}/dependencies/package-manager</outputDirectory>
                                 </artifactItem>
                                 <!--
-                                    The no-interface package
+                                    The no-interface package -->
                                     <artifactItem>
-                                    <groupId>org.jboss.ejb3</groupId>
-                                    <artifactId>jboss-ejb3-nointerface</artifactId>
+                                    <groupId>org.jboss.ejb3.nointerface</groupId>
+                                    <artifactId>jboss-ejb3-nointerface-impl</artifactId>
                                     <classifier>package</classifier>
                                     <type>jar</type>
                                     <outputDirectory>${project.build.directory}/dependencies/package</outputDirectory>
                                     </artifactItem>
-                                -->
+
                             </artifactItems>
                             <overWriteIfNewer>true</overWriteIfNewer>
                             <stripVersion>true</stripVersion>
@@ -161,16 +161,25 @@
 
             <!--
                 Install no-interface package in pre-integration-test
-                phase <plugin>
+                phase -->
+            <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <executions> <execution>
-                <id>install-nointerface-package</id>
-                <phase>pre-integration-test</phase> <goals>
-                <goal>run</goal> </goals> <configuration> <tasks> <ant
-                antfile="build-test.xml"
-                target="install-no-interface-package" /> </tasks>
-                </configuration> </execution> </executions> </plugin>
-            -->
+                <executions>
+                    <execution>
+                        <id>install-nointerface-package</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks> 
+                                <ant antfile="${project.build.directory}/test-classes/build-test.xml" target="install-no-interface-package" /> 
+                            </tasks>
+                        </configuration>
+                    </execution> 
+                </executions> 
+            </plugin>
+            
             <!--
                 After installing the no-interface package, now start the
                 server in pre-integration-test phase
@@ -261,7 +270,7 @@
 
         <dependency>
             <groupId>org.jboss.jbossas</groupId>
-            <artifactId>jboss-as-server</artifactId>
+            <artifactId>jboss-as-ejb3</artifactId>
             <version>5.1.0.GA</version>
             <scope>test</scope>
         </dependency>
@@ -274,8 +283,16 @@
             <groupId>org.jboss.ejb3</groupId>
             <artifactId>jboss-ejb3_1</artifactId>
             <scope>test</scope>
-            <version>1.0.0</version>
+            <version>1.0.2</version>
             <type>pom</type>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.jboss.ejb3.nointerface</groupId>
+            <artifactId>jboss-ejb3-nointerface-impl</artifactId>
+            <version>${project.version}</version>
+            <classifier>package</classifier>
+            <scope>test</scope>
         </dependency>
 
         <!--

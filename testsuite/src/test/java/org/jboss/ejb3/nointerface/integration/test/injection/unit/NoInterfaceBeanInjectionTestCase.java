@@ -23,6 +23,7 @@ package org.jboss.ejb3.nointerface.integration.test.injection.unit;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.net.URL;
 
 import org.jboss.ejb3.nointerface.integration.test.AbstractNoInterfaceTestCase;
@@ -58,7 +59,8 @@ public class NoInterfaceBeanInjectionTestCase extends AbstractNoInterfaceTestCas
    public void before() throws Exception
    {
       String jarName = NoInterfaceBeanInjectionTestCase.class.getSimpleName() + ".jar";
-      deployment = buildSimpleJar(jarName, CalculatorBean.class.getPackage());
+      File jar = buildSimpleJar(jarName, CalculatorBean.class.getPackage());
+      this.deployment = jar.toURI().toURL();
       this.redeploy(deployment);
    }
 

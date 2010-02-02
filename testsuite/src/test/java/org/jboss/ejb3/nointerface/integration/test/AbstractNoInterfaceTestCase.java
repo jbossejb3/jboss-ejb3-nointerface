@@ -57,7 +57,7 @@ public abstract class AbstractNoInterfaceTestCase
    private final static String DEPLOYER_NAME = "jboss.system:service=MainDeployer";
 
    protected MBeanServerConnection server;
-   
+
    private Context ctx;
 
    /**
@@ -79,7 +79,7 @@ public abstract class AbstractNoInterfaceTestCase
     * The directory into which the deployments required by the tests will be placed
     */
    protected static final File TEST_DEPLOYMENTS_FOLDER = new File(TARGET_DIRECTORY, "test-lib");
-   
+
    /**
     * The <project>/src/test/resources folder 
     */
@@ -152,7 +152,16 @@ public abstract class AbstractNoInterfaceTestCase
       return urls;
    }
 
-   protected static URL buildSimpleJar(String jarName, Package... testArtifactPackages) throws IOException
+   /**
+    * Creates a jar file with the name <code>jarName</code> including in that jar, the packages
+    * <code>testArtifactPackages</code>, and classes under those packages.
+    * 
+    * @param jarName Name of the jar file (including the .jar extension)
+    * @param testArtifactPackages The test packages
+    * @return Returns the created jar file 
+    * @throws IOException
+    */
+   protected static File buildSimpleJar(String jarName, Package... testArtifactPackages) throws IOException
    {
       JavaArchive jar = Archives.create(jarName, JavaArchive.class);
       jar.addPackages(false, testArtifactPackages);
@@ -174,7 +183,39 @@ public abstract class AbstractNoInterfaceTestCase
       return writeToFileSystem(jar);
    }
 
-   protected static URL writeToFileSystem(JavaArchive javaArchive) throws IOException
+   /**
+    * Creates a ear file with the name <code>earName</code>. The .ear will include the
+    * (at the root) the files passed through the <code>deployments</code> param.
+    * 
+    * @param earName Name of the ear file (including the .ear extension)
+    * @param deployments The files to be included in the .ear
+    * @return Returns the created ear file 
+    * @throws IOException
+    */
+   protected static File buildSimpleEAR(String earName, File... deployments) throws IOException,
+         IllegalArgumentException
+   {
+      if (earName == null || deployments == null)
+      {
+         throw new IllegalArgumentException("earName and deployments are mandatory");
+      }
+      JavaArchive ear = Archives.create(earName, JavaArchive.class);
+
+      for (File deployment : deployments)
+      {
+         ear.addResource(deployment);
+      }
+      return writeToFileSystem(ear);
+   }
+
+   /**
+    * Writes out a {@link JavaArchive} to the file system
+    * @param javaArchive The {@link JavaArchive} which will be written out to the file system
+    * @return Returns the {@link File} corresponding to the {@link JavaArchive} which
+    *   was written out to the file system
+    * @throws IOException
+    */
+   protected static File writeToFileSystem(JavaArchive javaArchive) throws IOException
    {
       InputStream inputStream = javaArchive.as(ZipExporter.class).exportZip();
       String jarFileName = javaArchive.getName();
@@ -206,7 +247,7 @@ public abstract class AbstractNoInterfaceTestCase
             bis.close();
          }
       }
-      return jarFile.toURI().toURL();
+      return jarFile;
    }
 
    /**
@@ -313,11 +354,10 @@ public abstract class AbstractNoInterfaceTestCase
       {"java.net.URL"};
       invoke(getDeployerName(), "undeploy", args, sig);
    }
-   
+
    protected Context getInitialContext()
    {
       return this.ctx;
    }
-   
-   
+
 }

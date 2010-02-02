@@ -24,6 +24,7 @@ package org.jboss.ejb3.nointerface.integration.test.equality.unit;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.net.URL;
 
 import org.jboss.ejb3.nointerface.integration.test.AbstractNoInterfaceTestCase;
@@ -61,8 +62,9 @@ public class NoInterfaceBeanEqualityTestCase extends AbstractNoInterfaceTestCase
    public void before() throws Exception
    {
       String jarName = "nointerface-bean-equality.jar";
-      deployment = buildSimpleJar(jarName, SimpleNoInterfaceSLSBean.class.getPackage(), EqualityCheckerBeanRemote.class
+      File jar = buildSimpleJar(jarName, SimpleNoInterfaceSLSBean.class.getPackage(), EqualityCheckerBeanRemote.class
             .getPackage());
+      this.deployment = jar.toURI().toURL();
       this.redeploy(deployment);
    }
 
