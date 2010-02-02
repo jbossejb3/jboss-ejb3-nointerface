@@ -28,6 +28,32 @@
         <version.metadata_ejb>2.0.0-alpha-5</version.metadata_ejb>
         <version.metadata_ear>2.0.0.Alpha</version.metadata_ear>
     </properties>
+    
+    <build>
+        <plugins>
+            <!-- Assembly Plugin -->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2-beta-4</version>
+                <executions>
+                    <!--  Build no-interface "package" -->
+                  <execution>
+                    <id>build-nointerface-package</id> 
+                    <phase>package</phase>
+                    <goals>
+                      <goal>single</goal>
+                    </goals>
+                  </execution>
+                </executions>
+                <configuration>
+                  <descriptors>
+                    <descriptor>src/assembly/package-assembler.xml</descriptor>
+                  </descriptors>
+                </configuration>
+            </plugin>
+        </plugins>
+    
+    </build>
 
     <!-- Dependencies -->
     <dependencies>
