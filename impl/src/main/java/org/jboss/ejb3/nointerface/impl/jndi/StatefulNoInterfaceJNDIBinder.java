@@ -34,6 +34,7 @@ import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.ejb.jboss.JBossSessionBean31MetaData;
 import org.jboss.util.naming.NonSerializableFactory;
+import org.jboss.util.naming.Util;
 
 /**
  * StatefulNoInterfaceJNDIBinder
@@ -113,7 +114,7 @@ public class StatefulNoInterfaceJNDIBinder extends AbstractNoInterfaceViewJNDIBi
       // log the jndi binding information 
       this.prettyPrintJNDIBindingInfo(beanMetaData, noInterfaceJndiName);
       // bind to jndi
-      jndiCtx.bind(noInterfaceJndiName, reference);
+      Util.bind(jndiCtx, noInterfaceJndiName, reference);
 
       return noInterfaceJndiName;
 
