@@ -44,7 +44,16 @@
         <module>build</module>
         <module>spi</module>
         <module>impl</module>
-        <module>testsuite</module>
     </modules>
+    
+    <profiles>
+        <!--  An integration profile for running the integration testsuite -->
+        <profile>
+            <id>integration</id>
+            <modules>
+                <module>testsuite</module>
+            </modules>
+        </profile>
+    </profiles>
 
 </project>
