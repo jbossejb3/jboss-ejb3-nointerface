@@ -68,10 +68,6 @@ public class JavassistNoInterfaceViewFactory implements NoInterfaceViewFactory
       }
 
       ProxyFactory javassistProxyFactory = new ProxyFactory();
-      // set the classloader provider on the factory so that it uses the bean class' classloader
-      // during proxy creation
-      ProxyFactory.classLoaderProvider = new NoInterfaceViewProxyFactoryClassLoaderProvider();
-
       // set the bean class for which we need a proxy
       javassistProxyFactory.setSuperclass(beanClass);
       // set a method filter so that we can filter out invocations on methods
