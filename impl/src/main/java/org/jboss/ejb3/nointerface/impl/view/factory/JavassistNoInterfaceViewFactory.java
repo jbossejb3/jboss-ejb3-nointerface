@@ -24,7 +24,6 @@ package org.jboss.ejb3.nointerface.impl.view.factory;
 import java.lang.reflect.InvocationHandler;
 
 import javassist.util.proxy.ProxyFactory;
-import javassist.util.proxy.ProxyFactory.ClassLoaderProvider;
 
 import org.jboss.ejb3.nointerface.impl.view.JavassistInvocationHandlerAdapter;
 import org.jboss.ejb3.nointerface.impl.view.NoInterfaceViewMethodFilter;
@@ -84,31 +83,4 @@ public class JavassistNoInterfaceViewFactory implements NoInterfaceViewFactory
 
    }
 
-   /**
-    * {@link NoInterfaceViewProxyFactoryClassLoaderProvider} is responsible for returning
-    * the correct classloader for nointerface view proxy creation through
-    * the javassist {@link ProxyFactory}
-    *
-    * @author Jaikiran Pai
-    * @version $Revision: $
-    */
-   private class NoInterfaceViewProxyFactoryClassLoaderProvider implements ClassLoaderProvider
-   {
-
-      /**
-       * Returns the {@link ClassLoader} for creating the nointerface view proxy.
-       * <p>
-       *   Internally, returns the {@link ClassLoader} which loaded {@link ProxyFactory#getSuperclass()},
-       *   since the nointerface view is created by setting the bean class as the
-       *   "super class" through {@link ProxyFactory#setSuperclass(Class)}
-       * </p> 
-       * @see javassist.util.proxy.ProxyFactory.ClassLoaderProvider#get(javassist.util.proxy.ProxyFactory)
-       */
-      @Override
-      public ClassLoader get(ProxyFactory pf)
-      {
-         return pf.getSuperclass().getClassLoader();
-      }
-
-   }
 }
