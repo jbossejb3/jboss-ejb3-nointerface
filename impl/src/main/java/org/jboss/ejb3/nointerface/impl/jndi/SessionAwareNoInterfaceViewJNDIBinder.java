@@ -37,21 +37,21 @@ import org.jboss.util.naming.NonSerializableFactory;
 import org.jboss.util.naming.Util;
 
 /**
- * StatefulNoInterfaceJNDIBinder
- *
- * Responsible for creating and binding the appropriate objects
- * corresponding to the no-interface view of a stateful session bean
+ * 
+ * Responsible for creating and binding nointerface view proxy (and any
+ * other relevant objects like session creating proxy factory) into jndi,
+ * for beans which are session aware (ex: Stateful session beans)
  *
  * @author Jaikiran Pai
  * @version $Revision: $
  */
-public class StatefulNoInterfaceJNDIBinder extends AbstractNoInterfaceViewJNDIBinder
+public class SessionAwareNoInterfaceViewJNDIBinder extends AbstractNoInterfaceViewJNDIBinder
 {
 
    /**
     * Logger
     */
-   private static Logger logger = Logger.getLogger(StatefulNoInterfaceJNDIBinder.class);
+   private static Logger logger = Logger.getLogger(SessionAwareNoInterfaceViewJNDIBinder.class);
 
    /**
     * Suffix to be added to the ejb-name to form the jndi name of no-interface stateful proxyfactory
@@ -63,7 +63,7 @@ public class StatefulNoInterfaceJNDIBinder extends AbstractNoInterfaceViewJNDIBi
     * @param beanClass The bean class
     * @param sessionBeanMetadata Metadata of the bean
     */
-   public StatefulNoInterfaceJNDIBinder(KernelControllerContext endPointCtx)
+   public SessionAwareNoInterfaceViewJNDIBinder(KernelControllerContext endPointCtx)
    {
       super(endPointCtx);
    }

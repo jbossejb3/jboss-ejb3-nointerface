@@ -24,6 +24,7 @@ package org.jboss.ejb3.nointerface.impl.invocationhandler;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.ejb3.endpoint.Endpoint;
@@ -117,6 +118,14 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
     */
    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
    {
+      // check to see if this method is expected to be handled
+      // by the nointerface view (for ex: only public methods of bean are allowed
+      // on nointerface view)
+      if (!isHandled(method))
+      {
+         throw new javax.ejb.EJBException("Cannot invoke method " + method.getName() + " on nointerface view");
+      }
+
       // handle equals() and hashCode() in this InvocationHandler
       try
       {
@@ -343,4 +352,119 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
    {
    }
 
+   /**
+    * 
+    * @param m
+    * @return
+    */
+   public boolean isHandled(Method m)
+   {
+      // We handle only public, non-static, non-final methods
+      if (!isPublic(m))
+      {
+         if (logger.isTraceEnabled())
+         {
+            logger.trace("Method " + m.getName() + " is *not* public");
+         }
+         // it's not a public method
+         return false;
+      }
+      if (isFinal(m))
+      {
+         if (logger.isTraceEnabled())
+         {
+            logger.trace("Method " + m.getName() + " is final");
+         }
+         // it's a final method
+         return false;
+      }
+      if (isStatic(m))
+      {
+         if (logger.isTraceEnabled())
+         {
+            logger.trace("Method " + m.getName() + " is static");
+         }
+         // it's a static method
+         return false;
+      }
+      if (isNative(m))
+      {
+         if (logger.isTraceEnabled())
+         {
+            logger.trace("Method " + m.getName() + " is native");
+         }
+         // it's a native method
+         return false;
+      }
+      // we handle rest of the methods
+      return true;
+   }
+
+   /**
+    * Returns true if the {@link Method} <code>m</code> is a public method.
+    * Else returns false
+    * 
+    * @param m The method
+    * @return
+    */
+   private boolean isPublic(Method m)
+   {
+      int modifiers = m.getModifiers();
+      if ((Modifier.PUBLIC & modifiers) == Modifier.PUBLIC)
+      {
+         return true;
+      }
+      return false;
+   }
+
+   /**
+    * Returns true if the {@link Method} <code>m</code> is a final method.
+    * Else returns false
+    * 
+    * @param m The method
+    * @return
+    */
+   private boolean isFinal(Method m)
+   {
+      int modifiers = m.getModifiers();
+      if ((Modifier.FINAL & modifiers) == Modifier.FINAL)
+      {
+         return true;
+      }
+      return false;
+   }
+
+   /**
+    * Returns true if the {@link Method} <code>m</code> is a static method.
+    * Else returns false
+    * 
+    * @param m The method
+    * @return
+    */
+   private boolean isStatic(Method m)
+   {
+      int modifiers = m.getModifiers();
+      if ((Modifier.STATIC & modifiers) == Modifier.STATIC)
+      {
+         return true;
+      }
+      return false;
+   }
+
+   /**
+    * Returns true if the {@link Method} <code>m</code> is a native method.
+    * Else returns false
+    * 
+    * @param m The method
+    * @return
+    */
+   private boolean isNative(Method m)
+   {
+      int modifiers = m.getModifiers();
+      if ((Modifier.NATIVE & modifiers) == Modifier.NATIVE)
+      {
+         return true;
+      }
+      return false;
+   }
 }

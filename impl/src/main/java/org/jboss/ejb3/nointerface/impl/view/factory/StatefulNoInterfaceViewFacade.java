@@ -29,6 +29,7 @@ import org.jboss.ejb3.endpoint.Endpoint;
 import org.jboss.ejb3.nointerface.impl.invocationhandler.NoInterfaceViewInvocationHandler;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.logging.Logger;
+import org.jboss.ejb3.proxy.javassist.*;
 
 /**
  * StatefulNoInterfaceViewFacade
@@ -117,8 +118,8 @@ public class StatefulNoInterfaceViewFacade
       // create an invocation handler
       InvocationHandler invocationHandler = new NoInterfaceViewInvocationHandler(this.endpointContext, session);
 
-      // Now create the view for this bean class and the newly created invocation handler
-      Object noInterfaceView = new JavassistNoInterfaceViewFactory().createView(invocationHandler, beanClass);
+      // Now create the proxy
+      Object noInterfaceView = new JavassistProxyFactory().createProxy(new Class<?>[] {beanClass}, invocationHandler);
       return noInterfaceView;
    }
 

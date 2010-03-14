@@ -27,28 +27,26 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 
 import org.jboss.ejb3.nointerface.impl.invocationhandler.NoInterfaceViewInvocationHandler;
-import org.jboss.ejb3.nointerface.impl.view.factory.JavassistNoInterfaceViewFactory;
+import org.jboss.ejb3.proxy.javassist.JavassistProxyFactory;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.ejb.jboss.JBossSessionBean31MetaData;
 import org.jboss.util.naming.NonSerializableFactory;
 
 /**
- * StatelessNoInterfaceJNDIBinder
- *
- *  Responsible for binding the appropriate objects corresponding to the
- *  no-interface view of a stateless session bean
+ * Responsible for binding a nointerface view proxy into jndi, for
+ * EJBs which are *not* session aware (ex: Stateless beans and Singleton beans)
  *
  * @author Jaikiran Pai
  * @version $Revision: $
  */
-public class StatelessNoInterfaceJNDIBinder extends AbstractNoInterfaceViewJNDIBinder
+public class SessionlessNoInterfaceViewJNDIBinder extends AbstractNoInterfaceViewJNDIBinder
 {
 
    /**
     * Logger
     */
-   private static Logger logger = Logger.getLogger(StatelessNoInterfaceJNDIBinder.class);
+   private static Logger logger = Logger.getLogger(SessionlessNoInterfaceViewJNDIBinder.class);
 
    /**
     * Constructor
@@ -57,7 +55,7 @@ public class StatelessNoInterfaceJNDIBinder extends AbstractNoInterfaceViewJNDIB
     * @param beanClass
     * @param sessionBeanMetadata
     */
-   public StatelessNoInterfaceJNDIBinder(KernelControllerContext endPointCtx)
+   public SessionlessNoInterfaceViewJNDIBinder(KernelControllerContext endPointCtx)
    {
       super(endPointCtx);
    }
@@ -81,7 +79,7 @@ public class StatelessNoInterfaceJNDIBinder extends AbstractNoInterfaceViewJNDIB
       Object noInterfaceView;
       try
       {
-         noInterfaceView = new JavassistNoInterfaceViewFactory().createView(invocationHandler, beanClass);
+         noInterfaceView = new JavassistProxyFactory().createProxy(new Class<?>[] {beanClass}, invocationHandler);
       }
       catch (Exception e)
       {

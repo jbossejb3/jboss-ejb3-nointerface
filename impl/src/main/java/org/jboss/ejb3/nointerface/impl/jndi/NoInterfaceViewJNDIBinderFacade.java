@@ -182,15 +182,12 @@ public class NoInterfaceViewJNDIBinderFacade
    {
       if (this.sessionBeanMetadata.isStateful())
       {
-         return new StatefulNoInterfaceJNDIBinder(this.endpointContext);
+         return new SessionAwareNoInterfaceViewJNDIBinder(this.endpointContext);
       }
-      else if (this.sessionBeanMetadata.isStateless())
+      else 
       {
-         return new StatelessNoInterfaceJNDIBinder(this.endpointContext);
+         return new SessionlessNoInterfaceViewJNDIBinder(this.endpointContext);
       }
-      throw new RuntimeException("Cannot get a jndi binder for bean " + this.sessionBeanMetadata.getEjbName()
-            + " since it's neither a stateful nor a stateless bean");
    }
-
 
 }
