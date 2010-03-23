@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jboss.ejb3.nointerface</groupId>
         <artifactId>jboss-ejb3-nointerface-build</artifactId>
-        <version>1.0.0-alpha-6</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <!-- POM Model Version -->
