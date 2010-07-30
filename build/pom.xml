@@ -4,13 +4,6 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <!-- Parent -->
-    <parent>
-        <groupId>org.jboss</groupId>
-        <artifactId>jboss-parent</artifactId>
-        <version>4</version>
-    </parent>
-
     <!-- Model Version -->
     <modelVersion>4.0.0</modelVersion>
 
@@ -43,6 +36,22 @@
         <system>jira</system>
         <url>http://jira.jboss.com/jira/browse/EJBTHREE</url>
     </issueManagement>
+    
+    <!-- Release management -->
+    <distributionManagement>
+            <repository>
+              <id>jboss-releases-repository</id>
+              <name>JBoss Releases Repository</name>
+              <url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/</url>
+            </repository>
+
+            <snapshotRepository>
+                <id>jboss-snapshots-repository</id>
+                <name>JBoss Snapshots Repository</name>
+                <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
+            </snapshotRepository>           
+    </distributionManagement>  
+    
 
     <!-- Build -->
     <build>
