@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <!-- Parent -->
     <parent>
@@ -28,8 +29,9 @@
         <version.org.jboss.ejb3_jboss-ejb3-test>1.0.0</version.org.jboss.ejb3_jboss-ejb3-test>
         <version.metadata_ejb>2.0.0-alpha-5</version.metadata_ejb>
         <version.metadata_ear>2.0.0.Alpha</version.metadata_ear>
+        <version.interceptor.spec.api>1.0.0.Beta1</version.interceptor.spec.api>
     </properties>
-    
+
     <build>
         <plugins>
             <!-- Assembly Plugin -->
@@ -38,22 +40,22 @@
                 <version>2.2-beta-4</version>
                 <executions>
                     <!--  Build no-interface "package" -->
-                  <execution>
-                    <id>build-nointerface-package</id> 
-                    <phase>package</phase>
-                    <goals>
-                      <goal>single</goal>
-                    </goals>
-                  </execution>
+                    <execution>
+                        <id>build-nointerface-package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
                 </executions>
                 <configuration>
-                  <descriptors>
-                    <descriptor>src/assembly/package-assembler.xml</descriptor>
-                  </descriptors>
+                    <descriptors>
+                        <descriptor>src/assembly/package-assembler.xml</descriptor>
+                    </descriptors>
                 </configuration>
             </plugin>
         </plugins>
-    
+
     </build>
 
     <!-- Dependencies -->
@@ -218,6 +220,19 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.8.4</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.spec.javax.interceptor</groupId>
+            <artifactId>jboss-interceptors-api_1.1_spec</artifactId>
+            <version>${version.interceptor.spec.api}</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 </project>

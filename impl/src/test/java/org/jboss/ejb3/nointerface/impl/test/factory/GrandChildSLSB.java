@@ -1,9 +1,9 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2008, Red Hat Middleware LLC, and individual contributors
+ * Copyright 2009, Red Hat Middleware LLC, and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
-  *
+ *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation; either version 2.1 of
@@ -21,32 +21,24 @@
  */
 package org.jboss.ejb3.nointerface.impl.test.factory;
 
+import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 
 /**
- * ChildBean
+ * GrandChild
  *
  * @author Jaikiran Pai
  * @version $Revision: $
  */
 @Stateless
-public class ChildBean extends AbstractSimpleBase
+@LocalBean
+public class GrandChildSLSB extends Child implements MyStateless
 {
 
    @Override
-   public String sayHiFromChild(String name)
+   public String sayHello(String name)
    {
-      return "Hi from " + ChildBean.class.getName() + " to user " + name;
-   }
+      return "Hello " + name;
+   } 
 
-   private void somePrivateMethod()
-   {
-      // do nothing
-   }
-
-
-   public int echoNumberFromChild(int number)
-   {
-      return number;
-   }
 }
