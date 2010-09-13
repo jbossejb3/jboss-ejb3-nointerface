@@ -26,7 +26,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.jboss.dependency.spi.ControllerState;
 import org.jboss.ejb3.endpoint.Endpoint;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.logging.Logger;
@@ -167,15 +166,12 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
     */
    public Endpoint getInstalledEndpoint()
    {
-      if (logger.isTraceEnabled())
-      {
-         logger.trace("Pushing the endpoint context to INSTALLED state from its current state = "
-               + this.endpointContext.getState().getStateString());
-      }
       try
       {
-         // first push the context corresponding to the endpoint to INSTALLED
-         this.endpointContext.getController().change(this.endpointContext, ControllerState.INSTALLED);
+         // EJBTHREE-2166 - Changing state through MC API won't work. So for now,
+         // we are going to rely on an already INSTALLED endpoint context
+//         this.endpointContext.getController().change(this.endpointContext, ControllerState.INSTALLED);
+         
          // get hold of the endpoint from its context
          Endpoint endpoint = (Endpoint) this.endpointContext.getTarget();
          return endpoint;

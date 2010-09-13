@@ -183,7 +183,10 @@ public class EJB3NoInterfaceDeployer extends AbstractDeployer
 
          // add dependency
          AbstractInjectionValueMetaData injectMetaData = new AbstractInjectionValueMetaData(containerMCBeanName);
-         injectMetaData.setDependentState(ControllerState.DESCRIBED);
+         // EJBTHREE-2166 - Depending on DESCRIBED state and then pushing to INSTALLED
+         // through MC API, won't work. So for now, just depend on INSTALLED state.
+         //injectMetaData.setDependentState(ControllerState.DESCRIBED);
+         injectMetaData.setDependentState(ControllerState.INSTALLED);
          injectMetaData.setFromContext(FromContext.CONTEXT);
 
          // Too bad we have to know the field name. Need to do more research on MC to see if we can

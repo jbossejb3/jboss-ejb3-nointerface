@@ -65,7 +65,7 @@ public class NoInterfaceViewJNDIBinderFacade
    // We need NOT use the annotation here at all, since the deployer adds this
    // dynamically. But having this here provides a better understanding about how
    // this field is used
-   @Inject(dependentState = "Described", fromContext = FromContext.CONTEXT)
+   @Inject(dependentState = "Installed", fromContext = FromContext.CONTEXT)
    protected KernelControllerContext endpointContext;
 
    /**
