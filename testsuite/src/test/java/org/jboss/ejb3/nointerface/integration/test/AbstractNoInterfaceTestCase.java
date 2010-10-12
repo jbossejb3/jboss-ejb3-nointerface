@@ -68,7 +68,7 @@ public abstract class AbstractNoInterfaceTestCase
    /**
     * basedir (set through Maven)
     */
-   protected static final File BASEDIR = new File(System.getProperty("basedir"));
+   protected static final File BASEDIR = new File(System.getProperty("basedir"), ".");
 
    /**
     * Target directory

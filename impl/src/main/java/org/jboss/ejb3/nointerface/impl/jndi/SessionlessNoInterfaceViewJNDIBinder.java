@@ -74,7 +74,7 @@ public class SessionlessNoInterfaceViewJNDIBinder extends AbstractNoInterfaceVie
       this.ensureNoInterfaceViewExists(beanMetaData);
 
 
-      InvocationHandler invocationHandler = new NoInterfaceViewInvocationHandler(this.endpointContext, null);
+      InvocationHandler invocationHandler = new NoInterfaceViewInvocationHandler(this.endpointContext, null, beanClass);
 
       Object noInterfaceView;
       try

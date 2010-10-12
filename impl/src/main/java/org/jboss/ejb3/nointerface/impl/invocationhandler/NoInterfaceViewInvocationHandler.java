@@ -96,14 +96,21 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
    private Serializable session;
 
    /**
+    * The business interface (== bean class, since this is a no-interface view) on
+    * which the proxy invocation happens.
+    */
+   private Class<?> businessInterface;
+   
+   /**
     * Constructor
     * @param container
     */
-   public NoInterfaceViewInvocationHandler(KernelControllerContext endpointContext, Serializable session)
+   public NoInterfaceViewInvocationHandler(KernelControllerContext endpointContext, Serializable session, Class<?> businessInterface)
    {
       assert endpointContext != null : "Endpoint context is null for no-interface view invocation handler";
       this.endpointContext = endpointContext;
       this.session = session;
+      this.businessInterface = businessInterface;
    }
 
    /**
@@ -144,7 +151,7 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
             + " - cannot invoke the method on bean";
 
       // finally pass-on the control to the endpoint
-      return endpoint.invoke(this.session, null, method, args);
+      return endpoint.invoke(this.session, this.businessInterface, method, args);
    }
 
    /**
