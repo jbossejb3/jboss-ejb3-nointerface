@@ -23,18 +23,12 @@ package org.jboss.ejb3.nointerface.impl.jndi;
 
 import javax.naming.Context;
 
-import org.jboss.beans.metadata.api.annotations.Inject;
 import org.jboss.beans.metadata.api.annotations.Start;
 import org.jboss.beans.metadata.api.annotations.Stop;
-import org.jboss.beans.metadata.api.model.FromContext;
 import org.jboss.ejb3.nointerface.spi.jndi.NoInterfaceViewJNDIBinder;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.ejb.jboss.JBossSessionBean31MetaData;
-import org.jboss.metadata.ejb.jboss.jndi.resolver.impl.JNDIPolicyBasedJNDINameResolverFactory;
-import org.jboss.metadata.ejb.jboss.jndi.resolver.spi.SessionBean31JNDINameResolver;
-import org.jboss.metadata.ejb.jboss.jndipolicy.plugins.DefaultJNDIBindingPolicyFactory;
-import org.jboss.metadata.ejb.jboss.jndipolicy.spi.DefaultJndiBindingPolicy;
 
 /**
  * NoInterfaceViewJNDIBinderFacade
@@ -62,10 +56,6 @@ public class NoInterfaceViewJNDIBinderFacade
     * an no-interface view
     */
    // Bean name will be added to this Inject by the deployer.
-   // We need NOT use the annotation here at all, since the deployer adds this
-   // dynamically. But having this here provides a better understanding about how
-   // this field is used
-   @Inject(dependentState = "Installed", fromContext = FromContext.CONTEXT)
    protected KernelControllerContext endpointContext;
 
    /**
@@ -82,12 +72,12 @@ public class NoInterfaceViewJNDIBinderFacade
     * JNDI naming context
     */
    private Context jndiCtx;
-
-   /**
-    * JNDI name resolver for the bean
-    */
-   private SessionBean31JNDINameResolver jndiNameResolver;
    
+   /**
+    * JNDI binder
+    */
+   private NoInterfaceViewJNDIBinder binder;
+
    /**
     * Constructor
     *
@@ -100,6 +90,7 @@ public class NoInterfaceViewJNDIBinderFacade
       this.jndiCtx = ctx;
       this.beanClass = beanClass;
       this.sessionBeanMetadata = sessionBeanMetadata;
+      
 
    }
 
@@ -124,7 +115,16 @@ public class NoInterfaceViewJNDIBinderFacade
          logger.trace("Creating no-interface view for endpoint " + this.endpointContext);
       }
 
-      this.getNoInterfaceViewJndiBinder().bindNoInterfaceView(this.jndiCtx, this.beanClass, this.sessionBeanMetadata);
+      if (this.sessionBeanMetadata.isStateful())
+      {
+         this.binder = new SessionAwareNoInterfaceViewJNDIBinder(this.endpointContext);
+      }
+      else 
+      {
+         this.binder = new SessionlessNoInterfaceViewJNDIBinder(this.endpointContext);
+      }
+
+      this.binder.bindNoInterfaceView(this.jndiCtx, this.beanClass, this.sessionBeanMetadata);
    }
 
    /**
@@ -139,7 +139,10 @@ public class NoInterfaceViewJNDIBinderFacade
       {
          logger.trace("Unbinding no-interface view from JNDI, for endpoint " + this.endpointContext);
       }
-      this.getNoInterfaceViewJndiBinder().unbindNoInterfaceView(this.jndiCtx, this.beanClass, this.sessionBeanMetadata);
+      if (this.binder != null)
+      {
+         this.binder.unbindNoInterfaceView(this.jndiCtx, this.beanClass, this.sessionBeanMetadata);
+      }
    }
 
    /**
@@ -151,43 +154,6 @@ public class NoInterfaceViewJNDIBinderFacade
    {
       this.endpointContext = endpointContext;
 
-   }
-
-   /**
-    * Returns the jndi name resolver, which will be responsible for returning the
-    * appropriate jndi names for various views of the session bean
-    * @return
-    */
-   protected SessionBean31JNDINameResolver getJNDINameResolver()
-   {
-      if (this.jndiNameResolver != null)
-      {
-         return this.jndiNameResolver;
-      }
-      DefaultJndiBindingPolicy jndiBindingPolicy = DefaultJNDIBindingPolicyFactory.getDefaultJNDIBindingPolicy();
-      return JNDIPolicyBasedJNDINameResolverFactory.getJNDINameResolver(this.sessionBeanMetadata, jndiBindingPolicy);
-   }
-   
-   /**
-    * Returns an appropriate instance of {@link NoInterfaceViewJNDIBinderFacade} based on the 
-    * <code>sessionBeanMetadata</code>
-    * 
-    * @param ctx JNDI naming context into which this {@link NoInterfaceViewJNDIBinderFacade} will be
-    *           responsible for binding/unbinding objects
-    * @param beanClass Bean class
-    * @param sessionBeanMetadata Session bean metadata of the bean class
-    * @return 
-    */
-   private NoInterfaceViewJNDIBinder getNoInterfaceViewJndiBinder()
-   {
-      if (this.sessionBeanMetadata.isStateful())
-      {
-         return new SessionAwareNoInterfaceViewJNDIBinder(this.endpointContext);
-      }
-      else 
-      {
-         return new SessionlessNoInterfaceViewJNDIBinder(this.endpointContext);
-      }
    }
 
 }

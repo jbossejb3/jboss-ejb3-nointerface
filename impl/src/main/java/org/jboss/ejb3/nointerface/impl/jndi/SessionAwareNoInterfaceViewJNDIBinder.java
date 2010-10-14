@@ -56,7 +56,7 @@ public class SessionAwareNoInterfaceViewJNDIBinder extends AbstractNoInterfaceVi
    /**
     * Suffix to be added to the ejb-name to form the jndi name of no-interface stateful proxyfactory
     */
-   private static final String NO_INTERFACE_STATEFUL_PROXY_FACTORY_JNDI_NAME_SUFFIX = "/no-interface-stateful-proxyfactory";
+   private static final String NO_INTERFACE_STATEFUL_PROXY_FACTORY_JNDI_NAME_SUFFIX = "_no-interface-stateful-proxyfactory";
 
    /**
     * Constructor
@@ -93,9 +93,11 @@ public class SessionAwareNoInterfaceViewJNDIBinder extends AbstractNoInterfaceVi
       StatefulNoInterfaceViewFacade statefulNoInterfaceViewFactory = new StatefulNoInterfaceViewFacade(beanClass,
             this.endpointContext);
 
-      // TODO - Needs to be a proper jndi name for the factory
-      String statefulProxyFactoryJndiName = beanMetaData.getEjbName()
-            + NO_INTERFACE_STATEFUL_PROXY_FACTORY_JNDI_NAME_SUFFIX;
+      // the no-interface view jndi name 
+      String noInterfaceJndiName = this.getJNDINameResolver(beanMetaData).resolveNoInterfaceJNDIName(beanMetaData);
+      // Create the proxy factory jndi name based on the no-interface view jndi name
+      String statefulProxyFactoryJndiName = noInterfaceJndiName + NO_INTERFACE_STATEFUL_PROXY_FACTORY_JNDI_NAME_SUFFIX;
+
       // Bind the proxy factory to jndi
       NonSerializableFactory.rebind(jndiCtx, statefulProxyFactoryJndiName, statefulNoInterfaceViewFactory, true);
 
@@ -110,7 +112,6 @@ public class SessionAwareNoInterfaceViewJNDIBinder extends AbstractNoInterfaceVi
       // add this refaddr to the reference which will be bound to jndi
       reference.add(refAddr);
 
-      String noInterfaceJndiName = this.getJNDINameResolver(beanMetaData).resolveNoInterfaceJNDIName(beanMetaData);
       // log the jndi binding information 
       this.prettyPrintJNDIBindingInfo(beanMetaData, noInterfaceJndiName);
       // bind to jndi
@@ -134,8 +135,10 @@ public class SessionAwareNoInterfaceViewJNDIBinder extends AbstractNoInterfaceVi
       this.ensureNoInterfaceViewExists(beanMetaData);
 
       String noInterfaceJndiName = this.getJNDINameResolver(beanMetaData).resolveNoInterfaceJNDIName(beanMetaData);
+      // unbind the nointerface view
       jndiCtx.unbind(noInterfaceJndiName);
-      jndiCtx.unbind(beanMetaData.getEjbName() + NO_INTERFACE_STATEFUL_PROXY_FACTORY_JNDI_NAME_SUFFIX);
+      // unbind the proxy factory too
+      jndiCtx.unbind(noInterfaceJndiName + NO_INTERFACE_STATEFUL_PROXY_FACTORY_JNDI_NAME_SUFFIX);
 
    }
 
