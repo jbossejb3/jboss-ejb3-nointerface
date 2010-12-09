@@ -3,6 +3,11 @@
   vi:ts=2:sw=2:expandtab:
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>org.jboss.ejb3.nointerface</groupId>
+        <artifactId>jboss-ejb3-nointerface-aggregator</artifactId>
+        <version>1.0.0-alpha-10-SNAPSHOT</version>
+    </parent>
 
     <!-- Model Version -->
     <modelVersion>4.0.0</modelVersion>
@@ -10,7 +15,6 @@
     <!-- Artifact Configuration -->
     <groupId>org.jboss.ejb3.nointerface</groupId>
     <artifactId>jboss-ejb3-nointerface-build</artifactId>
-    <version>1.0.0-alpha-10-SNAPSHOT</version>
     <name>JBoss EJB3.1 no-interface build</name>
     <description>Centralized Build Configuration for EJB 3.1+ no-interface support</description>
     <packaging>pom</packaging>

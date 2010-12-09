@@ -17,6 +17,9 @@
 
     <!-- Plugin Configuration -->
     <build>
+        <!-- make it easier to copy it around -->
+        <finalName>${artifactId}</finalName>
+
         <plugins>
 
             <!-- Deploy -->
