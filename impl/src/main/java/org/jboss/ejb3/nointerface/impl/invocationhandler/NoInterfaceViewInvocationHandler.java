@@ -124,7 +124,7 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
       // on nointerface view)
       if (!isHandled(method))
       {
-         throw new javax.ejb.EJBException("Cannot invoke method " + method.getName() + " on nointerface view");
+         throw new javax.ejb.EJBException("Cannot invoke method " + method + " on nointerface view");
       }
 
       // get the endpoint (which will involve pushing it to INSTALLED state)

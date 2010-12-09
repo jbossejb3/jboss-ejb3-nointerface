@@ -36,6 +36,8 @@ import org.jboss.metadata.ejb.jboss.JBossSessionBean31MetaData;
 import org.jboss.util.naming.NonSerializableFactory;
 import org.jboss.util.naming.Util;
 
+import static org.jboss.ejb3.nointerface.impl.jndi.JNDINameUtil.resolveNoInterfaceJNDIName;
+
 /**
  * 
  * Responsible for creating and binding nointerface view proxy (and any
@@ -94,7 +96,7 @@ public class SessionAwareNoInterfaceViewJNDIBinder extends AbstractNoInterfaceVi
             this.endpointContext);
 
       // the no-interface view jndi name 
-      String noInterfaceJndiName = this.getJNDINameResolver(beanMetaData).resolveNoInterfaceJNDIName(beanMetaData);
+      String noInterfaceJndiName = resolveNoInterfaceJNDIName(beanMetaData);
       // Create the proxy factory jndi name based on the no-interface view jndi name
       String statefulProxyFactoryJndiName = noInterfaceJndiName + NO_INTERFACE_STATEFUL_PROXY_FACTORY_JNDI_NAME_SUFFIX;
 
@@ -134,7 +136,7 @@ public class SessionAwareNoInterfaceViewJNDIBinder extends AbstractNoInterfaceVi
       // ensure it has a no-interface view
       this.ensureNoInterfaceViewExists(beanMetaData);
 
-      String noInterfaceJndiName = this.getJNDINameResolver(beanMetaData).resolveNoInterfaceJNDIName(beanMetaData);
+      String noInterfaceJndiName = resolveNoInterfaceJNDIName(beanMetaData);
       // unbind the nointerface view
       jndiCtx.unbind(noInterfaceJndiName);
       // unbind the proxy factory too

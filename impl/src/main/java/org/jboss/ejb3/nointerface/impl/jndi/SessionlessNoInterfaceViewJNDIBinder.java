@@ -33,6 +33,8 @@ import org.jboss.logging.Logger;
 import org.jboss.metadata.ejb.jboss.JBossSessionBean31MetaData;
 import org.jboss.util.naming.NonSerializableFactory;
 
+import static org.jboss.ejb3.nointerface.impl.jndi.JNDINameUtil.resolveNoInterfaceJNDIName;
+
 /**
  * Responsible for binding a nointerface view proxy into jndi, for
  * EJBs which are *not* session aware (ex: Stateless beans and Singleton beans)
@@ -86,7 +88,7 @@ public class SessionlessNoInterfaceViewJNDIBinder extends AbstractNoInterfaceVie
          throw new RuntimeException("Could not create no-interface view for bean class: " + beanClass, e);
       }
       // get no-interface view jndi name
-      String noInterfaceJndiName = this.getJNDINameResolver(beanMetaData).resolveNoInterfaceJNDIName(beanMetaData);
+      String noInterfaceJndiName = resolveNoInterfaceJNDIName(beanMetaData);
       // log the no-interface view jndi binding info
       this.prettyPrintJNDIBindingInfo(beanMetaData, noInterfaceJndiName);
       // bind to jndi
@@ -107,7 +109,7 @@ public class SessionlessNoInterfaceViewJNDIBinder extends AbstractNoInterfaceVie
       // ensure no-interface view exists
       this.ensureNoInterfaceViewExists(beanMetaData);
 
-      String noInterfaceJndiName = this.getJNDINameResolver(beanMetaData).resolveNoInterfaceJNDIName(beanMetaData);
+      String noInterfaceJndiName = resolveNoInterfaceJNDIName(beanMetaData);
       jndiCtx.unbind(noInterfaceJndiName);
 
    }

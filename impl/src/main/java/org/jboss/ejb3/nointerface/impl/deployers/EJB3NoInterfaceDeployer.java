@@ -21,10 +21,6 @@
  */
 package org.jboss.ejb3.nointerface.impl.deployers;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.naming.InitialContext;
-
 import org.jboss.beans.metadata.api.model.FromContext;
 import org.jboss.beans.metadata.plugins.AbstractInjectionValueMetaData;
 import org.jboss.beans.metadata.spi.BeanMetaData;
@@ -35,6 +31,7 @@ import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.spi.deployer.helpers.AbstractDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.ejb3.deployers.Ejb3MetadataProcessingDeployer;
+import org.jboss.ejb3.nointerface.impl.jndi.JNDINameUtil;
 import org.jboss.ejb3.nointerface.impl.jndi.NoInterfaceViewJNDIBinderFacade;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.ear.jboss.JBossAppMetaData;
@@ -43,6 +40,10 @@ import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeansMetaData;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
 import org.jboss.metadata.ejb.jboss.JBossSessionBean31MetaData;
 import org.jboss.metadata.ejb.jboss.JBossSessionBeanMetaData;
+
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.naming.InitialContext;
 
 /**
  * EJB3NoInterfaceDeployer
@@ -180,13 +181,19 @@ public class EJB3NoInterfaceDeployer extends AbstractDeployer
          BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder(noInterfaceViewMCBeanName,
                noInterfaceViewJNDIBinderFacade.getClass().getName());
          builder.setConstructorValue(noInterfaceViewJNDIBinderFacade);
+         builder.addSupply("jndi:" + JNDINameUtil.resolveNoInterfaceJNDIName(sessionBeanMetaData));
 
          // add dependency
          AbstractInjectionValueMetaData injectMetaData = new AbstractInjectionValueMetaData(containerMCBeanName);
          // EJBTHREE-2166 - Depending on DESCRIBED state and then pushing to INSTALLED
          // through MC API, won't work. So for now, just depend on INSTALLED state.
          //injectMetaData.setDependentState(ControllerState.DESCRIBED);
-         injectMetaData.setDependentState(ControllerState.INSTALLED);
+         //injectMetaData.setDependentState(ControllerState.INSTALLED);
+         // We must break cyclic dependencies
+         if(sessionBeanMetaData.isStateful())
+            injectMetaData.setDependentState(ControllerState.INSTALLED);
+         else
+            injectMetaData.setDependentState(ControllerState.PRE_INSTALL);
          injectMetaData.setFromContext(FromContext.CONTEXT);
 
          // Too bad we have to know the field name. Need to do more research on MC to see if we can

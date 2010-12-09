@@ -26,10 +26,6 @@ import org.jboss.ejb3.nointerface.spi.jndi.NoInterfaceViewJNDIBinder;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.ejb.jboss.JBossSessionBean31MetaData;
-import org.jboss.metadata.ejb.jboss.jndi.resolver.impl.JNDIPolicyBasedJNDINameResolverFactory;
-import org.jboss.metadata.ejb.jboss.jndi.resolver.spi.SessionBean31JNDINameResolver;
-import org.jboss.metadata.ejb.jboss.jndipolicy.plugins.DefaultJNDIBindingPolicyFactory;
-import org.jboss.metadata.ejb.jboss.jndipolicy.spi.DefaultJndiBindingPolicy;
 
 /**
  * AbstractNoInterfaceViewJNDIBinder
@@ -78,16 +74,6 @@ public abstract class AbstractNoInterfaceViewJNDIBinder implements NoInterfaceVi
       }
    }
    
-   /**
-    * @param sessionBean The session bean metadata
-    * @return Returns a jndi-name resolver for the session bean
-    */
-   protected SessionBean31JNDINameResolver getJNDINameResolver(JBossSessionBean31MetaData sessionBean)
-   {
-      DefaultJndiBindingPolicy jndiBindingPolicy = DefaultJNDIBindingPolicyFactory.getDefaultJNDIBindingPolicy();
-      return JNDIPolicyBasedJNDINameResolverFactory.getJNDINameResolver(sessionBean, jndiBindingPolicy);
-   }
-
    /**
     * Utility method to log the jndi name, to which the no-interface view of the bean represented
     * by the <code>sessionBean<code>, will be bound.
