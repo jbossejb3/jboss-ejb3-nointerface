@@ -21,14 +21,20 @@
  */
 package org.jboss.ejb3.nointerface.impl.invocationhandler;
 
+import org.jboss.ejb3.endpoint.Endpoint;
+import org.jboss.ejb3.sis.Interceptor;
+import org.jboss.ejb3.sis.reflect.InterceptorInvocationHandler;
+import org.jboss.kernel.spi.dependency.KernelControllerContext;
+import org.jboss.logging.Logger;
+
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
-import org.jboss.ejb3.endpoint.Endpoint;
-import org.jboss.kernel.spi.dependency.KernelControllerContext;
-import org.jboss.logging.Logger;
+import static java.lang.reflect.Modifier.isFinal;
+import static java.lang.reflect.Modifier.isNative;
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
 
 /**
  * NoInterfaceViewInvocationHandler
@@ -43,34 +49,6 @@ import org.jboss.logging.Logger;
  */
 public class NoInterfaceViewInvocationHandler implements InvocationHandler
 {
-
-   /**
-    * Equals and hashCode methods are handled within this invocation handler
-    */
-   private static final Method METHOD_EQUALS;
-
-   private static final Method METHOD_HASH_CODE;
-
-   private static final Method METHOD_TO_STRING;
-
-   static
-   {
-      try
-      {
-         METHOD_EQUALS = Object.class.getDeclaredMethod("equals", Object.class);
-         METHOD_HASH_CODE = Object.class.getDeclaredMethod("hashCode");
-         METHOD_TO_STRING = Object.class.getDeclaredMethod("toString");
-      }
-      catch (SecurityException e)
-      {
-         throw new RuntimeException(e);
-      }
-      catch (NoSuchMethodException e)
-      {
-         throw new RuntimeException(e);
-      }
-
-   }
 
    /**
     * Logger
@@ -100,10 +78,11 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
     * which the proxy invocation happens.
     */
    private Class<?> businessInterface;
+
+   private InvocationHandler delegate;
    
    /**
     * Constructor
-    * @param container
     */
    public NoInterfaceViewInvocationHandler(KernelControllerContext endpointContext, Serializable session, Class<?> businessInterface)
    {
@@ -111,6 +90,22 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
       this.endpointContext = endpointContext;
       this.session = session;
       this.businessInterface = businessInterface;
+
+      InvocationHandler endpointInvocationHandler = new InvocationHandler()
+      {
+         @Override
+         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
+         {
+            return invokeEndpoint(proxy, method, args);
+         }
+      };
+      Interceptor interceptor = new ObjectMethodsInterceptor(this);
+      this.delegate = new InterceptorInvocationHandler(endpointInvocationHandler, interceptor);
+   }
+
+   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
+   {
+      return delegate.invoke(proxy, method, args);
    }
 
    /**
@@ -122,7 +117,7 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
     * @param method The invoked method
     * @param args The arguments to the method
     */
-   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
+   private Object invokeEndpoint(Object proxy, Method method, Object[] args) throws Throwable
    {
       // check to see if this method is expected to be handled
       // by the nointerface view (for ex: only public methods of bean are allowed
@@ -132,19 +127,6 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
          throw new javax.ejb.EJBException("Cannot invoke method " + method.getName() + " on nointerface view");
       }
 
-      // handle equals() and hashCode() in this InvocationHandler
-      try
-      {
-         return handleDirectly(proxy, method, args);
-      }
-      catch (CannotHandleDirectlyException chde)
-      {
-         //ignore
-         if (logger.isTraceEnabled())
-         {
-            logger.trace("Cannot handle method: " + method.getName() + " in " + this.getClass().getName());
-         }
-      }
       // get the endpoint (which will involve pushing it to INSTALLED state)
       Endpoint endpoint = getInstalledEndpoint();
       assert endpoint != null : "No endpoint associated with context " + this.endpointContext
@@ -233,7 +215,7 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
       // then they are not equal
       if (!(other instanceof NoInterfaceViewInvocationHandler))
       {
-         return false;
+         return other.equals(this);
       }
 
       NoInterfaceViewInvocationHandler otherNoInterfaceViewInvocationHandler = (NoInterfaceViewInvocationHandler) other;
@@ -261,7 +243,7 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
    @Override
    public int hashCode()
    {
-      int hashCode = this.getInstalledEndpoint().hashCode();
+      int hashCode = this.endpointContext.hashCode();
       if (this.session != null)
       {
          hashCode += this.session.hashCode();
@@ -275,7 +257,7 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
    @Override
    public String toString()
    {
-      StringBuilder sb = new StringBuilder("No-Interface view for endpoint [ " + this.getEndpoint() + " ]");
+      StringBuilder sb = new StringBuilder("No-Interface view for endpoint [ " + endpointContext.getName() + " ]");
       if (this.session != null)
       {
          sb.append(" and session " + this.session);
@@ -284,90 +266,19 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
    }
 
    /**
-    * Handles {@link Object#equals(Object)} and {@link Object#hashCode()} method invocations on the 
-    * proxy.
     * 
-    * @param proxy
-    * @param method The method that was invoked on the no-interface view
-    * @param args The arguments to the method
-    * @return  
-    * @throws CannotHandleDirectlyException If the <code>method</code> is neither {@link Object#equals(Object) nor Object#hashCode()
-    */
-   private Object handleDirectly(Object proxy, Method method, Object[] args) throws CannotHandleDirectlyException
-   {
-
-      // if equals()
-      if (method.equals(METHOD_EQUALS))
-      {
-         Object other = args[0];
-         // if the other object is null, then it's a false straight-away as per the
-         // contract of equals method
-         if (other == null)
-         {
-            return false;
-         }
-         // simple instance comparison
-         if (this == other)
-         {
-            return true;
-         }
-
-         // This is the important one (and a good one) - thanks to Carlo
-         // When the equals is called on the no-interface view - view1.equals(view2)
-         // we somehow have to get the invocation handler (which hold the session information) for view2.
-         // So the trick here is to first check whether the other is an instance of 
-         // MCAwareNoInterfaceViewInvocationHandler. If not, then invoke the equals on that object.
-         //  - If the "other" happens to be an no-interface view, the call will be redirected
-         // to the invocation handler of view2 and thus we have the session information that we needed
-         // from view2.
-         //  - If the "other" happens to be an instance of some other class, then that class' equals
-         // would return false since its not an instance of MCAwareNoInterfaceViewInvocationHandler.
-         if (!(other instanceof NoInterfaceViewInvocationHandler))
-         {
-            return other.equals(this);
-         }
-
-         return this.equals(other);
-      }
-      // handle hashCode
-      else if (method.equals(METHOD_HASH_CODE))
-      {
-         return this.hashCode();
-      }
-      else if (method.equals(METHOD_TO_STRING))
-      {
-         return this.toString();
-      }
-      throw new CannotHandleDirectlyException();
-   }
-
-   /**
-    * 
-    * CannotHandleDirectlyException
-    * 
-    * Will be used to indicate that this {@link NoInterfaceViewInvocationHandler} cannot 
-    * handle the method invocation in the invocation handler. 
-    *
-    * @author Jaikiran Pai
-    * @version $Revision: $
-    */
-   private class CannotHandleDirectlyException extends Exception
-   {
-   }
-
-   /**
-    * 
-    * @param m
+    * @param method
     * @return
     */
-   public boolean isHandled(Method m)
+   public boolean isHandled(Method method)
    {
+      int m = method.getModifiers();
       // We handle only public, non-static, non-final methods
       if (!isPublic(m))
       {
          if (logger.isTraceEnabled())
          {
-            logger.trace("Method " + m.getName() + " is *not* public");
+            logger.trace("Method " + method + " is *not* public");
          }
          // it's not a public method
          return false;
@@ -376,7 +287,7 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
       {
          if (logger.isTraceEnabled())
          {
-            logger.trace("Method " + m.getName() + " is final");
+            logger.trace("Method " + method + " is final");
          }
          // it's a final method
          return false;
@@ -385,7 +296,7 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
       {
          if (logger.isTraceEnabled())
          {
-            logger.trace("Method " + m.getName() + " is static");
+            logger.trace("Method " + method + " is static");
          }
          // it's a static method
          return false;
@@ -394,80 +305,12 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
       {
          if (logger.isTraceEnabled())
          {
-            logger.trace("Method " + m.getName() + " is native");
+            logger.trace("Method " + method + " is native");
          }
          // it's a native method
          return false;
       }
       // we handle rest of the methods
       return true;
-   }
-
-   /**
-    * Returns true if the {@link Method} <code>m</code> is a public method.
-    * Else returns false
-    * 
-    * @param m The method
-    * @return
-    */
-   private boolean isPublic(Method m)
-   {
-      int modifiers = m.getModifiers();
-      if ((Modifier.PUBLIC & modifiers) == Modifier.PUBLIC)
-      {
-         return true;
-      }
-      return false;
-   }
-
-   /**
-    * Returns true if the {@link Method} <code>m</code> is a final method.
-    * Else returns false
-    * 
-    * @param m The method
-    * @return
-    */
-   private boolean isFinal(Method m)
-   {
-      int modifiers = m.getModifiers();
-      if ((Modifier.FINAL & modifiers) == Modifier.FINAL)
-      {
-         return true;
-      }
-      return false;
-   }
-
-   /**
-    * Returns true if the {@link Method} <code>m</code> is a static method.
-    * Else returns false
-    * 
-    * @param m The method
-    * @return
-    */
-   private boolean isStatic(Method m)
-   {
-      int modifiers = m.getModifiers();
-      if ((Modifier.STATIC & modifiers) == Modifier.STATIC)
-      {
-         return true;
-      }
-      return false;
-   }
-
-   /**
-    * Returns true if the {@link Method} <code>m</code> is a native method.
-    * Else returns false
-    * 
-    * @param m The method
-    * @return
-    */
-   private boolean isNative(Method m)
-   {
-      int modifiers = m.getModifiers();
-      if ((Modifier.NATIVE & modifiers) == Modifier.NATIVE)
-      {
-         return true;
-      }
-      return false;
    }
 }
