@@ -6,6 +6,7 @@
         <groupId>org.jboss.ejb3.nointerface</groupId>
         <artifactId>jboss-ejb3-nointerface-build</artifactId>
         <version>1.0.0-alpha-10-SNAPSHOT</version>
+        <relativePath>../build/pom.xml</relativePath>
     </parent>
 
     <!-- POM Model Version -->
