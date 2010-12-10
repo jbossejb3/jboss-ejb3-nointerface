@@ -31,6 +31,7 @@
         <version.metadata_ejb>2.0.0-alpha-5</version.metadata_ejb>
         <version.metadata_ear>2.0.0.Alpha</version.metadata_ear>
         <version.interceptor.spec.api>1.0.0.Beta1</version.interceptor.spec.api>
+        <version.org.jboss.ejb3.async>1.0.0-alpha-8-SNAPSHOT</version.org.jboss.ejb3.async>
     </properties>
 
     <build>
@@ -70,9 +71,15 @@
         </dependency>
 
         <dependency>
-           <groupId>org.jboss.ejb3.sis</groupId>
-           <artifactId>jboss-ejb3-sis</artifactId>
-           <version>1.0.0-alpha-1</version>
+          <groupId>org.jboss.ejb3.async</groupId>
+          <artifactId>jboss-ejb3-async-spi</artifactId>
+          <version>${version.org.jboss.ejb3.async}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.ejb3.async</groupId>
+          <artifactId>jboss-ejb3-async-impl</artifactId>
+          <version>${version.org.jboss.ejb3.async}</version>
+          <scope>provided</scope>
         </dependency>
 
         <!-- MC -->
@@ -81,7 +88,6 @@
             <artifactId>jboss-kernel</artifactId>
             <version>${version.org.jboss.microcontainer}</version>
         </dependency>
-
 
         <!-- javassist proxy factory  -->
         <dependency>
@@ -191,6 +197,10 @@
                     <groupId>org.jboss.metadata</groupId>
                     <artifactId>jboss-metadata</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.jboss.jbossas</groupId>
+                    <artifactId>jboss-as-server</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -207,6 +217,12 @@
             <groupId>org.jboss.naming</groupId>
             <artifactId>jnp-client</artifactId>
             <version>5.0.0.GA</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.naming</groupId>
+            <artifactId>jnpserver</artifactId>
+            <version>5.0.0.GA</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- JUnit support -->
@@ -236,6 +252,12 @@
             <artifactId>jboss-interceptors-api_1.1_spec</artifactId>
             <version>${version.interceptor.spec.api}</version>
             <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+          <groupId>org.jboss.ejb3.sis</groupId>
+          <artifactId>jboss-ejb3-sis</artifactId>
+          <version>1.0.0-alpha-1</version>
         </dependency>
 
        <dependency>

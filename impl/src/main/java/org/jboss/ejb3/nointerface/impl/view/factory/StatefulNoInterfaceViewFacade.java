@@ -117,6 +117,7 @@ public class StatefulNoInterfaceViewFacade
 
       // create an invocation handler
       InvocationHandler invocationHandler = new NoInterfaceViewInvocationHandler(this.endpointContext, session, this.beanClass);
+      
 
       // Now create the proxy
       Object noInterfaceView = new JavassistProxyFactory().createProxy(new Class<?>[] {beanClass}, invocationHandler);
