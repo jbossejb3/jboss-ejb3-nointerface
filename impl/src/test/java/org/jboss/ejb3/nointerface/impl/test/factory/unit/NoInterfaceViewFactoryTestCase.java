@@ -40,10 +40,12 @@ import javax.naming.NamingException;
 import junit.framework.Assert;
 
 import org.jboss.dependency.spi.ControllerState;
+import org.jboss.ejb3.async.spi.AsyncEndpoint;
 import org.jboss.ejb3.endpoint.Endpoint;
 import org.jboss.ejb3.endpoint.SessionFactory;
 import org.jboss.ejb3.nointerface.impl.jndi.SessionAwareNoInterfaceViewJNDIBinder;
 import org.jboss.ejb3.nointerface.impl.jndi.SessionlessNoInterfaceViewJNDIBinder;
+import org.jboss.ejb3.nointerface.impl.test.MockEndpoint;
 import org.jboss.ejb3.nointerface.impl.test.factory.GrandChildSFSB;
 import org.jboss.ejb3.nointerface.impl.test.factory.GrandChildSLSB;
 import org.jboss.ejb3.nointerface.impl.test.factory.SimpleSFSBeanWithoutInterfaces;
@@ -196,6 +198,7 @@ public class NoInterfaceViewFactoryTestCase
    {
       // mock a kernel controller context
       KernelControllerContext mockKernelControllerCtx = mock(KernelControllerContext.class);
+      when(mockKernelControllerCtx.getTarget()).thenReturn(new MockEndpoint());
       // create the SLSB nointerface view binder
       SessionlessNoInterfaceViewJNDIBinder jndiBinder = new SessionlessNoInterfaceViewJNDIBinder(
             mockKernelControllerCtx);
@@ -234,6 +237,13 @@ public class NoInterfaceViewFactoryTestCase
    }
    
    /**
+    * Interface representing the container which implements
+    * both {@link Endpoint} and {@link AsyncEndpoint} interfaces
+    * @author <a href="mailto:andrew.rubinger@jboss.org">ALR</a>
+    */
+   private static interface MockContainer extends Endpoint,AsyncEndpoint{}
+   
+   /**
     * Tests that the no-interface view created for a SFSB is type-compatible with the bean class
     * 
     * @throws Exception
@@ -247,7 +257,7 @@ public class NoInterfaceViewFactoryTestCase
       when(mockKernelControllerCtx.getController()).thenReturn(mockKernelController);
       when(mockKernelControllerCtx.getState()).thenReturn(ControllerState.INSTALLED);
       // mock endpoint
-      Endpoint mockEndPoint = mock(Endpoint.class);
+      Endpoint mockEndPoint = mock(MockContainer.class);
       when(mockKernelControllerCtx.getTarget()).thenReturn(mockEndPoint);
       when(mockEndPoint.isSessionAware()).thenReturn(true);
       // mock session factory

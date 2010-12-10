@@ -91,7 +91,7 @@ public class SessionAwareNoInterfaceViewJNDIBinder extends AbstractNoInterfaceVi
       // This factory will be bound to JNDI and will be invoked (through an objectfactory) to create
       // the no-interface view for a SFSB
       StatefulNoInterfaceViewFacade statefulNoInterfaceViewFactory = new StatefulNoInterfaceViewFacade(beanClass,
-            this.endpointContext);
+            this.endpointContext, beanMetaData);
 
       // the no-interface view jndi name 
       String noInterfaceJndiName = this.getJNDINameResolver(beanMetaData).resolveNoInterfaceJNDIName(beanMetaData);

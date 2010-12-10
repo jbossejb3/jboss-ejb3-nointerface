@@ -21,11 +21,15 @@
  */
 package org.jboss.ejb3.nointerface.impl.invocationhandler;
 
+import org.jboss.ejb3.async.spi.AsyncEndpoint;
 import org.jboss.ejb3.endpoint.Endpoint;
+import org.jboss.ejb3.nointerface.impl.async.AsyncClientInterceptor;
 import org.jboss.ejb3.sis.Interceptor;
+import org.jboss.ejb3.sis.InterceptorAssembly;
 import org.jboss.ejb3.sis.reflect.InterceptorInvocationHandler;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.logging.Logger;
+import org.jboss.metadata.ejb.spec.AsyncMethodsMetaData;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
@@ -84,7 +88,7 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
    /**
     * Constructor
     */
-   public NoInterfaceViewInvocationHandler(KernelControllerContext endpointContext, Serializable session, Class<?> businessInterface)
+   public NoInterfaceViewInvocationHandler(KernelControllerContext endpointContext, Serializable session, Class<?> businessInterface,final AsyncMethodsMetaData asyncMethods)
    {
       assert endpointContext != null : "Endpoint context is null for no-interface view invocation handler";
       this.endpointContext = endpointContext;
@@ -99,8 +103,11 @@ public class NoInterfaceViewInvocationHandler implements InvocationHandler
             return invokeEndpoint(proxy, method, args);
          }
       };
-      Interceptor interceptor = new ObjectMethodsInterceptor(this);
-      this.delegate = new InterceptorInvocationHandler(endpointInvocationHandler, interceptor);
+      final Interceptor asyncInterceptor = new AsyncClientInterceptor((AsyncEndpoint) endpointContext.getTarget(),
+            asyncMethods, session);
+      Interceptor chain = new InterceptorAssembly(new Interceptor[]
+      {new ObjectMethodsInterceptor(this), asyncInterceptor});
+      this.delegate = new InterceptorInvocationHandler(endpointInvocationHandler, chain);
    }
 
    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable

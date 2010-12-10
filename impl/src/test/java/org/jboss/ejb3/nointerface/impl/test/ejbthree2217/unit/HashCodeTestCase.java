@@ -21,18 +21,20 @@
  */
 package org.jboss.ejb3.nointerface.impl.test.ejbthree2217.unit;
 
-import org.jboss.ejb3.nointerface.impl.invocationhandler.NoInterfaceViewInvocationHandler;
-import org.jboss.ejb3.nointerface.impl.test.ejbthree2217.Magician;
-import org.jboss.kernel.spi.dependency.KernelControllerContext;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
 import java.lang.reflect.Proxy;
 
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.jboss.ejb3.nointerface.impl.invocationhandler.NoInterfaceViewInvocationHandler;
+import org.jboss.ejb3.nointerface.impl.test.MockEndpoint;
+import org.jboss.ejb3.nointerface.impl.test.ejbthree2217.Magician;
+import org.jboss.kernel.spi.dependency.KernelControllerContext;
+import org.jboss.metadata.ejb.spec.AsyncMethodsMetaData;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
@@ -45,11 +47,12 @@ public class HashCodeTestCase
    public static void beforeClass()
    {
       KernelControllerContext endpointContext = mock(KernelControllerContext.class);
-      when(endpointContext.getTarget()).thenThrow(new RuntimeException("Do not call getTarget()"));
+      when(endpointContext.getTarget()).thenReturn(new MockEndpoint());
       Serializable session = null;
       Class<?> businessInterface = Magician.class;
-
-      NoInterfaceViewInvocationHandler handler = new NoInterfaceViewInvocationHandler(endpointContext, session, businessInterface);
+      
+      NoInterfaceViewInvocationHandler handler = new NoInterfaceViewInvocationHandler(endpointContext, session,
+            businessInterface, new AsyncMethodsMetaData());
 
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       Class<?> interfaces[] = { businessInterface };

@@ -31,6 +31,7 @@ import org.jboss.ejb3.proxy.javassist.JavassistProxyFactory;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.ejb.jboss.JBossSessionBean31MetaData;
+import org.jboss.metadata.ejb.spec.AsyncMethodsMetaData;
 import org.jboss.util.naming.NonSerializableFactory;
 
 /**
@@ -74,7 +75,9 @@ public class SessionlessNoInterfaceViewJNDIBinder extends AbstractNoInterfaceVie
       this.ensureNoInterfaceViewExists(beanMetaData);
 
 
-      InvocationHandler invocationHandler = new NoInterfaceViewInvocationHandler(this.endpointContext, null, beanClass);
+      final AsyncMethodsMetaData asyncMethods = beanMetaData.getAsyncMethods();
+      InvocationHandler invocationHandler = new NoInterfaceViewInvocationHandler(this.endpointContext, null, beanClass,
+            asyncMethods == null ? new AsyncMethodsMetaData() : asyncMethods);
 
       Object noInterfaceView;
       try

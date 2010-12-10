@@ -27,9 +27,11 @@ import java.lang.reflect.InvocationHandler;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.ejb3.endpoint.Endpoint;
 import org.jboss.ejb3.nointerface.impl.invocationhandler.NoInterfaceViewInvocationHandler;
+import org.jboss.ejb3.proxy.javassist.JavassistProxyFactory;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.logging.Logger;
-import org.jboss.ejb3.proxy.javassist.*;
+import org.jboss.metadata.ejb.jboss.JBossSessionBean31MetaData;
+import org.jboss.metadata.ejb.spec.AsyncMethodsMetaData;
 
 /**
  * StatefulNoInterfaceViewFacade
@@ -62,17 +64,31 @@ public class StatefulNoInterfaceViewFacade
     * 
     */
    protected KernelControllerContext endpointContext;
+   
+   /**
+    * Bean Metadata
+    */
+   private final JBossSessionBean31MetaData metadata; 
 
    /**
     * Constructor
     * @param beanClass
     * @param container
     * @param statefulSessionFactory
+    * @param metadata Bean metadata, required
     */
-   public StatefulNoInterfaceViewFacade(Class<?> beanClass, KernelControllerContext containerContext)
+   public StatefulNoInterfaceViewFacade(Class<?> beanClass, KernelControllerContext containerContext,
+         final JBossSessionBean31MetaData metadata)
    {
+      // Precondition checks
+      if(metadata==null)
+      {
+         throw new IllegalArgumentException("metadata must be supplied");
+      }
+      
       this.beanClass = beanClass;
       this.endpointContext = containerContext;
+      this.metadata = metadata;
    }
 
    /**
@@ -116,7 +132,9 @@ public class StatefulNoInterfaceViewFacade
       logger.debug("Created session " + session + " for " + this.beanClass);
 
       // create an invocation handler
-      InvocationHandler invocationHandler = new NoInterfaceViewInvocationHandler(this.endpointContext, session, this.beanClass);
+      AsyncMethodsMetaData asyncMethods = this.metadata.getAsyncMethods();
+      InvocationHandler invocationHandler = new NoInterfaceViewInvocationHandler(this.endpointContext, session,
+            this.beanClass, asyncMethods==null?new AsyncMethodsMetaData():asyncMethods);
       
 
       // Now create the proxy
