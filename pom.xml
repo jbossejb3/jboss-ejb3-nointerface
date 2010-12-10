@@ -14,6 +14,43 @@
     <name>JBoss EJB 3.1+ no-interface component Aggregator</name>
     <url>http://www.jboss.org</url>
     <description>Aggregator for no-interface component</description>
+    
+    <!-- SCM -->
+    <scm>
+      <connection>scm:git:git://github.com/jbossejb3/jboss-ejb3-nointerface.git</connection>
+      <developerConnection>scm:git:git@github.com:jbossejb3/jboss-ejb3-nointerface.git</developerConnection>
+      <url>http://github.com/jbossejb3/jboss-ejb3-nointerface</url>
+    </scm>
+    
+    <!-- Issues -->
+    <issueManagement>
+        <system>jira</system>
+        <url>http://jira.jboss.com/jira/browse/EJBTHREE</url>
+    </issueManagement>
+
+    <!-- Release management -->
+    <distributionManagement>
+            <repository>
+              <id>jboss-releases-repository</id>
+              <name>JBoss Releases Repository</name>
+              <url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/</url>
+            </repository>
+
+            <snapshotRepository>
+                <id>jboss-snapshots-repository</id>
+                <name>JBoss Snapshots Repository</name>
+                <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
+            </snapshotRepository>           
+    </distributionManagement>  
+    
+    <properties>
+    
+        <!-- Versioning -->
+        <version.junit_junit>4.6</version.junit_junit>
+        <version.jboss.logging.spi>2.0.5.GA</version.jboss.logging.spi>
+        <version.jboss.logging.log4j>2.0.5.GA</version.jboss.logging.log4j>
+        
+    </properties>
 
     <!-- Plugin Configuration -->
     <build>
@@ -22,23 +59,105 @@
 
         <plugins>
 
-            <!-- Deploy -->
+            <!-- Release -->            
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
+              <artifactId>maven-release-plugin</artifactId>
+              <version>2.0</version>
+              <configuration>
+                <autoVersionSubmodules>true</autoVersionSubmodules>
+              </configuration>
+            </plugin>
+
+            <!-- Compiler / JDK6 required for EJB 3.1 -->
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <inherited>true</inherited>
                 <configuration>
-                    <!-- Don't include this aggregator in the deployment -->
-                    <skip>true</skip>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <showDeprecation>false</showDeprecation>
+                    <showWarnings>true</showWarnings>
+                    <optimize>true</optimize>
+                    <compilerVersion>1.6</compilerVersion>
+                    <fork>true</fork>
+                    <argLine>-Xmx512M</argLine>
+                    <executable>${JAVA_HOME}/bin/javac</executable>
+                </configuration>
+            </plugin>
+
+            <!-- Surefire -->
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <trimStackTrace>false</trimStackTrace>
+                    <printSummary>true</printSummary>
+                    <includes>
+                        <include>**/*TestCase.java</include>
+                        <include>**/*TestSuite.java</include>
+                    </includes>
+                    <forkMode>always</forkMode>
+                </configuration>
+            </plugin>
+
+            <!-- Enforce Maven Environment -->
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-maven-environment</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <rules>
+                        <requireJavaVersion>
+                            <version>1.6</version> <!-- Must be JDK6 -->
+                        </requireJavaVersion>
+                        <requireProperty>
+                            <property>env.JAVA_HOME</property>
+                            <message>"JAVA_HOME needs to be set to compile"</message>
+                        </requireProperty>
+                    </rules>
                 </configuration>
             </plugin>
 
         </plugins>
     </build>
+    
+    <!-- Dependency Management -->
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${version.junit_junit}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging-log4j</artifactId>
+                <version>${version.jboss.logging.log4j}</version>
+                <scope>runtime</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging-spi</artifactId>
+                <version>${version.jboss.logging.spi}</version>
+            </dependency>
+
+
+        </dependencies>
+    </dependencyManagement>
 
     <!-- Aggregate Modules -->
     <modules>
         <!--  Order matters -->
-        <module>build</module>
         <module>spi</module>
         <module>impl</module>
     </modules>
