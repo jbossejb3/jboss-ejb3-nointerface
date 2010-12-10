@@ -31,7 +31,7 @@
         <version.metadata_ejb>2.0.0-alpha-5</version.metadata_ejb>
         <version.metadata_ear>2.0.0.Alpha</version.metadata_ear>
         <version.interceptor.spec.api>1.0.0.Beta1</version.interceptor.spec.api>
-        <version.org.jboss.ejb3.async>1.0.0-alpha-8-SNAPSHOT</version.org.jboss.ejb3.async>
+        <version.org.jboss.ejb3.async>1.0.0-alpha-8</version.org.jboss.ejb3.async>
     </properties>
 
     <build>
