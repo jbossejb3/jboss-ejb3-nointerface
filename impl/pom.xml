@@ -62,14 +62,7 @@
 
     <!-- Dependencies -->
     <dependencies>
-
-        <!-- nointerface spi -->
-        <dependency>
-            <groupId>org.jboss.ejb3.nointerface</groupId>
-            <artifactId>jboss-ejb3-nointerface-spi</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
+    
         <dependency>
           <groupId>org.jboss.ejb3.async</groupId>
           <artifactId>jboss-ejb3-async-spi</artifactId>
@@ -80,6 +73,19 @@
           <artifactId>jboss-ejb3-async-impl</artifactId>
           <version>${version.org.jboss.ejb3.async}</version>
           <scope>provided</scope>
+        </dependency>
+
+        <!-- nointerface spi -->
+        <dependency>
+            <groupId>org.jboss.ejb3.nointerface</groupId>
+            <artifactId>jboss-ejb3-nointerface-spi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+          <groupId>org.jboss.ejb3.sis</groupId>
+          <artifactId>jboss-ejb3-sis</artifactId>
+          <version>1.0.0-alpha-1</version>
         </dependency>
 
         <!-- MC -->
@@ -252,12 +258,6 @@
             <artifactId>jboss-interceptors-api_1.1_spec</artifactId>
             <version>${version.interceptor.spec.api}</version>
             <scope>test</scope>
-        </dependency>
-        
-        <dependency>
-          <groupId>org.jboss.ejb3.sis</groupId>
-          <artifactId>jboss-ejb3-sis</artifactId>
-          <version>1.0.0-alpha-1</version>
         </dependency>
 
        <dependency>
