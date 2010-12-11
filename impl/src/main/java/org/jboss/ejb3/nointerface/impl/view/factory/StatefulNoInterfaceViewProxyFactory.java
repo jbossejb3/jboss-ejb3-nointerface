@@ -34,8 +34,7 @@ import org.jboss.metadata.ejb.jboss.JBossSessionBean31MetaData;
 import org.jboss.metadata.ejb.spec.AsyncMethodsMetaData;
 
 /**
- * StatefulNoInterfaceViewFacade
- *
+ * 
  * Responsible for (not necessarily in the following order)
  * - Creating a session from the stateful container
  * - Creating the no-interface view for a stateful session bean
@@ -43,13 +42,13 @@ import org.jboss.metadata.ejb.spec.AsyncMethodsMetaData;
  * @author Jaikiran Pai
  * @version $Revision: $
  */
-public class StatefulNoInterfaceViewFacade 
+public class StatefulNoInterfaceViewProxyFactory 
 {
 
    /**
     * Logger
     */
-   private static Logger logger = Logger.getLogger(StatefulNoInterfaceViewFacade.class);
+   private static Logger logger = Logger.getLogger(StatefulNoInterfaceViewProxyFactory.class);
 
    /**
     * The bean class
@@ -77,7 +76,7 @@ public class StatefulNoInterfaceViewFacade
     * @param statefulSessionFactory
     * @param metadata Bean metadata, required
     */
-   public StatefulNoInterfaceViewFacade(Class<?> beanClass, KernelControllerContext containerContext,
+   public StatefulNoInterfaceViewProxyFactory(Class<?> beanClass, KernelControllerContext containerContext,
          final JBossSessionBean31MetaData metadata)
    {
       // Precondition checks

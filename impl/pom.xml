@@ -27,7 +27,7 @@
         <version.javassist>3.7.1.GA</version.javassist>
         <version.ejb3.javassist.proxy>1.0.0-alpha-1</version.ejb3.javassist.proxy>
         <version.org.jboss.ejb3_jboss-ejb3-test>1.0.0</version.org.jboss.ejb3_jboss-ejb3-test>
-        <version.metadata_ejb>2.0.0-alpha-5</version.metadata_ejb>
+        <version.metadata_ejb>2.0.0-alpha-26</version.metadata_ejb>
         <version.metadata_ear>2.0.0.Alpha</version.metadata_ear>
         <version.interceptor.spec.api>1.0.0.Beta1</version.interceptor.spec.api>
         <version.org.jboss.ejb3.async>1.0.0-alpha-8</version.org.jboss.ejb3.async>

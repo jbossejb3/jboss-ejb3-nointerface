@@ -21,9 +21,9 @@
  */
 package org.jboss.ejb3.nointerface.impl.deployers;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
+import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import org.jboss.beans.metadata.api.model.FromContext;
 import org.jboss.beans.metadata.plugins.AbstractInjectionValueMetaData;
@@ -35,14 +35,15 @@ import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.spi.deployer.helpers.AbstractDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.ejb3.deployers.Ejb3MetadataProcessingDeployer;
-import org.jboss.ejb3.nointerface.impl.jndi.NoInterfaceViewJNDIBinderFacade;
+import org.jboss.ejb3.nointerface.impl.jndi.AbstractNoInterfaceViewBinder;
+import org.jboss.ejb3.nointerface.impl.jndi.SessionlessBeanNoInterfaceViewBinder;
+import org.jboss.ejb3.nointerface.impl.jndi.StatefulBeanNoInterfaceViewBinder;
 import org.jboss.logging.Logger;
-import org.jboss.metadata.ear.jboss.JBossAppMetaData;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeansMetaData;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
 import org.jboss.metadata.ejb.jboss.JBossSessionBean31MetaData;
-import org.jboss.metadata.ejb.jboss.JBossSessionBeanMetaData;
+import org.jboss.metadata.ejb.jboss.jndi.resolver.impl.JNDIPolicyBasedSessionBean31JNDINameResolver;
 
 /**
  * EJB3NoInterfaceDeployer
@@ -155,49 +156,7 @@ public class EJB3NoInterfaceDeployer extends AbstractDeployer
             return;
          }
          Class<?> beanClass = Class.forName(sessionBeanMetaData.getEjbClass(), false, unit.getClassLoader());
-
-         String containerMCBeanName = sessionBeanMetaData.getContainerName();
-         if (logger.isTraceEnabled())
-         {
-            logger.trace("Container name for bean " + sessionBeanMetaData.getEjbName() + " in unit " + unit + " is "
-                  + containerMCBeanName);
-         }
-         if (containerMCBeanName == null)
-         {
-            // The container name is set in the metadata only after the creation of the container
-            // However, this deployer does not have an dependency on the creation of a container,
-            // so getting the container name from the bean metadata won't work. Need to do a different/better way
-            //String containerMCBeanName = sessionBeanMetaData.getContainerName();
-            containerMCBeanName = getContainerName(unit, sessionBeanMetaData);
-
-         }
-
-         // Create the NoInterfaceViewJNDIBinder (MC bean) and add a dependency on the DESCRIBED
-         // state of the container (endpoint) MC bean
-         NoInterfaceViewJNDIBinderFacade noInterfaceViewJNDIBinderFacade = new NoInterfaceViewJNDIBinderFacade(
-               new InitialContext(), beanClass, sessionBeanMetaData);
-         String noInterfaceViewMCBeanName = unit.getName() + "$" + sessionBeanMetaData.getEjbName();
-         BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder(noInterfaceViewMCBeanName,
-               noInterfaceViewJNDIBinderFacade.getClass().getName());
-         builder.setConstructorValue(noInterfaceViewJNDIBinderFacade);
-
-         // add dependency
-         AbstractInjectionValueMetaData injectMetaData = new AbstractInjectionValueMetaData(containerMCBeanName);
-         // EJBTHREE-2166 - Depending on DESCRIBED state and then pushing to INSTALLED
-         // through MC API, won't work. So for now, just depend on INSTALLED state.
-         //injectMetaData.setDependentState(ControllerState.DESCRIBED);
-         injectMetaData.setDependentState(ControllerState.INSTALLED);
-         injectMetaData.setFromContext(FromContext.CONTEXT);
-
-         // Too bad we have to know the field name. Need to do more research on MC to see if we can
-         // add property metadata based on type instead of field name.
-         builder.addPropertyMetaData("endpointContext", injectMetaData);
-
-         // Add this as an attachment
-         unit.addAttachment(BeanMetaData.class + ":" + noInterfaceViewMCBeanName, builder.getBeanMetaData());
-
-         logger.debug("No-interface JNDI binder for container " + containerMCBeanName
-               + " has been created and added to the deployment unit " + unit);
+         this.createAndAttachNoInterfaceViewBinder(unit, beanClass, sessionBeanMetaData);
 
       }
       catch (Throwable t)
@@ -219,73 +178,62 @@ public class EJB3NoInterfaceDeployer extends AbstractDeployer
 
    }
    
-   /**
-    * Ultimately, the container name should come from the <code>sessionBeanMetadata</code>.
-    * However because of the current behaviour where the container on its start sets the containername
-    * in the metadata, its not possible to get this information even before the container is started.
-    *
-    * Hence let's for the time being create the container name from all the information that we have
-    * in the <code>unit</code>
-    *
-    * @param unit The deployment unit
-    * @param sessionBeanMetadata Session bean metadata
-    * @return Returns the container name for the bean corresponding to the <code>sessionBeanMetadata</code> in the <code>unit</code>
-    *
-    * @throws MalformedObjectNameException
-    */
-   private String getContainerName(DeploymentUnit unit, JBossSessionBeanMetaData sessionBeanMetadata)
-         throws MalformedObjectNameException
+   private void createAndAttachNoInterfaceViewBinder(DeploymentUnit unit, Class<?> beanClass, JBossSessionBean31MetaData sessionBean)
    {
-      // TODO the base ejb3 jmx object name comes from Ejb3Module.BASE_EJB3_JMX_NAME, but
-      // we don't need any reference to ejb3-core. Right now just hard code here, we need
-      // a better way/place for this later
-      StringBuilder containerName = new StringBuilder("jboss.j2ee:service=EJB3" + ",");
-
-      // Get the top level unit for this unit (ex: the top level might be an ear and this unit might be the jar
-      // in that ear
-      DeploymentUnit toplevelUnit = unit.getTopLevel();
-      if (toplevelUnit != null)
+      Context initCtx;
+      try
       {
-         // if top level is an ear, then create the name with the ear reference
-         if (isEar(toplevelUnit))
-         {
-            containerName.append("ear=");
-            containerName.append(toplevelUnit.getSimpleName());
-            containerName.append(",");
-
-         }
+         initCtx = new InitialContext();
       }
-      // now work on the passed unit, to get the jar name
-      if (unit.getSimpleName() == null)
+      catch (NamingException ne)
       {
-         containerName.append("*");
+         throw new RuntimeException(ne);
+      }
+      JNDIPolicyBasedSessionBean31JNDINameResolver jndiNameResolver = new JNDIPolicyBasedSessionBean31JNDINameResolver();
+      String jndiName = jndiNameResolver.resolveNoInterfaceJNDIName(sessionBean);
+      AbstractNoInterfaceViewBinder binder = null;
+      if (sessionBean.isStateful())
+      {
+         binder = new StatefulBeanNoInterfaceViewBinder(initCtx, jndiName, beanClass, sessionBean);
       }
       else
       {
-         containerName.append("jar=");
-         containerName.append(unit.getSimpleName());
+         binder = new SessionlessBeanNoInterfaceViewBinder(initCtx, jndiName, beanClass, sessionBean);
       }
-      // now the ejbname
-      containerName.append(",name=");
-      containerName.append(sessionBeanMetadata.getEjbName());
+      String containerName = sessionBean.getContainerName();
+      String binderName = containerName + ",type=nointerface-view-jndi-binder";
+      
+      BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder(binderName, binder.getClass().getName());
+      builder.setConstructorValue(binder);
+      
+      // add jndi: supply
+      builder.addSupply("jndi:" + jndiName);
 
-      if (logger.isTraceEnabled())
+      // add dependency
+      AbstractInjectionValueMetaData injectMetaData = new AbstractInjectionValueMetaData(containerName);
+      // EJBTHREE-2166 - Depending on DESCRIBED state and then pushing to INSTALLED
+      // through MC API, won't work. So for now, just depend on INSTALLED state.
+      //injectMetaData.setDependentState(ControllerState.DESCRIBED);
+      injectMetaData.setDependentState(ControllerState.INSTALLED);
+      injectMetaData.setFromContext(FromContext.CONTEXT);
+
+      // Too bad we have to know the field name. Need to do more research on MC to see if we can
+      // add property metadata based on type instead of field name.
+      builder.addPropertyMetaData("endpointContext", injectMetaData);
+      
+      if (unit.isComponent())
       {
-         logger.trace("Container name generated for ejb = " + sessionBeanMetadata.getEjbName() + " in unit " + unit
-               + " is " + containerName);
+         // Attach it to parent since we are processing a component DU and BeanMetaDataDeployer doesn't
+         // pick up BeanMetaData from component DU
+         unit.getParent().addAttachment(BeanMetaData.class + ":" + binderName, builder.getBeanMetaData());
       }
-      ObjectName containerJMXName = new ObjectName(containerName.toString());
-      return containerJMXName.getCanonicalName();
+      else
+      {
+         unit.addAttachment(BeanMetaData.class + ":" + binderName, builder.getBeanMetaData());
+      }
+      
+      logger.debug("No-interface JNDI binder for container " + containerName + " has been created and added to the deployment unit " + unit);
+
    }
 
-   /**
-    * Returns true if this <code>unit</code> represents an .ear deployment
-    *
-    * @param unit
-    * @return
-    */
-   private boolean isEar(DeploymentUnit unit)
-   {
-      return unit.getSimpleName().endsWith(".ear") || unit.getAttachment(JBossAppMetaData.class) != null;
-   }
 }

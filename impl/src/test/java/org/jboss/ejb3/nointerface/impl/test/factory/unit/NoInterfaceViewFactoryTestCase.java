@@ -43,8 +43,9 @@ import org.jboss.dependency.spi.ControllerState;
 import org.jboss.ejb3.async.spi.AsyncEndpoint;
 import org.jboss.ejb3.endpoint.Endpoint;
 import org.jboss.ejb3.endpoint.SessionFactory;
-import org.jboss.ejb3.nointerface.impl.jndi.SessionAwareNoInterfaceViewJNDIBinder;
-import org.jboss.ejb3.nointerface.impl.jndi.SessionlessNoInterfaceViewJNDIBinder;
+import org.jboss.ejb3.nointerface.impl.jndi.AbstractNoInterfaceViewBinder;
+import org.jboss.ejb3.nointerface.impl.jndi.SessionlessBeanNoInterfaceViewBinder;
+import org.jboss.ejb3.nointerface.impl.jndi.StatefulBeanNoInterfaceViewBinder;
 import org.jboss.ejb3.nointerface.impl.test.MockEndpoint;
 import org.jboss.ejb3.nointerface.impl.test.factory.GrandChildSFSB;
 import org.jboss.ejb3.nointerface.impl.test.factory.GrandChildSLSB;
@@ -199,21 +200,20 @@ public class NoInterfaceViewFactoryTestCase
       // mock a kernel controller context
       KernelControllerContext mockKernelControllerCtx = mock(KernelControllerContext.class);
       when(mockKernelControllerCtx.getTarget()).thenReturn(new MockEndpoint());
-      // create the SLSB nointerface view binder
-      SessionlessNoInterfaceViewJNDIBinder jndiBinder = new SessionlessNoInterfaceViewJNDIBinder(
-            mockKernelControllerCtx);
       Context jndiCtx = this.getJNDIContext();
       
       // create metadata for the SLSB
       JBossMetaData metadata = this.createMetaData(GrandChildSLSB.class);
-      JBossSessionBean31MetaData sessionBean = (JBossSessionBean31MetaData) metadata.getEnterpriseBean(GrandChildSLSB.class
-            .getSimpleName());
-      
-      // bind
-      jndiBinder.bindNoInterfaceView(jndiCtx, GrandChildSLSB.class, sessionBean);
-
-      // now lookup the bound no-interface view and carry out the type compatible tests
+      JBossSessionBean31MetaData sessionBean = (JBossSessionBean31MetaData) metadata.getEnterpriseBean(GrandChildSLSB.class.getSimpleName());
       String jndiName = GrandChildSLSB.class.getSimpleName() + "/no-interface";
+
+      // create the SLSB nointerface view binder
+      AbstractNoInterfaceViewBinder jndiBinder = new SessionlessBeanNoInterfaceViewBinder(jndiCtx, jndiName, GrandChildSLSB.class, sessionBean);
+      // set the mock kernelcontrollercontext
+      jndiBinder.setEndpointContext(mockKernelControllerCtx);
+      // bind
+      jndiBinder.start();
+
       Object noInterfaceView = jndiCtx.lookup(jndiName);
 
       Assert.assertNotNull("Lookup of nointerface view returned null", noInterfaceView);
@@ -265,20 +265,20 @@ public class NoInterfaceViewFactoryTestCase
       when(mockSessionFactory.createSession(Matchers.anyCollectionOf(Class.class).toArray(new Class<?>[0]), Matchers.anyCollectionOf(Object.class).toArray())).thenReturn("testsession");
       when(mockEndPoint.getSessionFactory()).thenReturn(mockSessionFactory);
       
-      // create the SLSB nointerface view binder
-      SessionAwareNoInterfaceViewJNDIBinder jndiBinder = new SessionAwareNoInterfaceViewJNDIBinder(mockKernelControllerCtx);
       Context jndiCtx = this.getJNDIContext();
       
       // create metadata for the SLSB
       JBossMetaData metadata = this.createMetaData(GrandChildSFSB.class);
-      JBossSessionBean31MetaData sfsbMetadata = (JBossSessionBean31MetaData) metadata.getEnterpriseBean(GrandChildSFSB.class
-            .getSimpleName());
-      
+      JBossSessionBean31MetaData sfsbMetadata = (JBossSessionBean31MetaData) metadata.getEnterpriseBean(GrandChildSFSB.class.getSimpleName());
+      String jndiName = GrandChildSFSB.class.getSimpleName() + "/no-interface";
+      // create the SLSB nointerface view binder
+      AbstractNoInterfaceViewBinder jndiBinder = new StatefulBeanNoInterfaceViewBinder(jndiCtx, jndiName, GrandChildSFSB.class, sfsbMetadata);
+      // set the mock kernelcontrollercontext
+      jndiBinder.setEndpointContext(mockKernelControllerCtx);
       // bind
-      jndiBinder.bindNoInterfaceView(jndiCtx, GrandChildSFSB.class, sfsbMetadata);
+      jndiBinder.start();
 
       // now lookup the bound no-interface view and carry out the type compatible tests
-      String jndiName = GrandChildSFSB.class.getSimpleName() + "/no-interface";
       Object noInterfaceView = jndiCtx.lookup(jndiName);
 
       Assert.assertNotNull("Lookup of nointerface view returned null", noInterfaceView);

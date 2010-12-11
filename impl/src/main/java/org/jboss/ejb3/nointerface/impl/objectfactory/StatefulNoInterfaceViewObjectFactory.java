@@ -29,7 +29,7 @@ import javax.naming.RefAddr;
 import javax.naming.Reference;
 import javax.naming.spi.ObjectFactory;
 
-import org.jboss.ejb3.nointerface.impl.view.factory.StatefulNoInterfaceViewFacade;
+import org.jboss.ejb3.nointerface.impl.view.factory.StatefulNoInterfaceViewProxyFactory;
 import org.jboss.logging.Logger;
 
 /**
@@ -65,17 +65,15 @@ public class StatefulNoInterfaceViewObjectFactory implements ObjectFactory
       // now lookup the factory
       Object proxyFactory = nameCtx.lookup(jndiNameOfStatefulProxyFactory);
 
-      assert proxyFactory instanceof StatefulNoInterfaceViewFacade : "Unexpected type found at jndi name "
-            + jndiNameOfStatefulProxyFactory + " Expected type " + StatefulNoInterfaceViewFacade.class.getName();
+      assert proxyFactory instanceof StatefulNoInterfaceViewProxyFactory : "Unexpected type found at jndi name "
+            + jndiNameOfStatefulProxyFactory + " Expected type " + StatefulNoInterfaceViewProxyFactory.class.getName();
 
-      StatefulNoInterfaceViewFacade noInterfaceViewFacade = (StatefulNoInterfaceViewFacade) proxyFactory;
-
-      return noInterfaceViewFacade.createNoInterfaceView();
-      // TODO: Should not throw an exception, return null instead. see objectfactory reference
+      StatefulNoInterfaceViewProxyFactory noInterfaceViewFactory = (StatefulNoInterfaceViewProxyFactory) proxyFactory;
+      return noInterfaceViewFactory.createNoInterfaceView();
    }
 
    /**
-    * Returns the jndi-name at which the {@link StatefulNoInterfaceViewFacade} can be found
+    * Returns the jndi-name at which the {@link StatefulNoInterfaceViewProxyFactory} can be found
     * @param ref
     * @return
     */

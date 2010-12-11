@@ -28,7 +28,6 @@ import javax.naming.NamingException;
 
 import org.jboss.ejb3.nointerface.impl.invocationhandler.NoInterfaceViewInvocationHandler;
 import org.jboss.ejb3.proxy.javassist.JavassistProxyFactory;
-import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.ejb.jboss.JBossSessionBean31MetaData;
 import org.jboss.metadata.ejb.spec.AsyncMethodsMetaData;
@@ -41,13 +40,13 @@ import org.jboss.util.naming.NonSerializableFactory;
  * @author Jaikiran Pai
  * @version $Revision: $
  */
-public class SessionlessNoInterfaceViewJNDIBinder extends AbstractNoInterfaceViewJNDIBinder
+public class SessionlessBeanNoInterfaceViewBinder extends AbstractNoInterfaceViewBinder
 {
 
    /**
     * Logger
     */
-   private static Logger logger = Logger.getLogger(SessionlessNoInterfaceViewJNDIBinder.class);
+   private static Logger logger = Logger.getLogger(SessionlessBeanNoInterfaceViewBinder.class);
 
    /**
     * Constructor
@@ -56,9 +55,9 @@ public class SessionlessNoInterfaceViewJNDIBinder extends AbstractNoInterfaceVie
     * @param beanClass
     * @param sessionBeanMetadata
     */
-   public SessionlessNoInterfaceViewJNDIBinder(KernelControllerContext endPointCtx)
+   public SessionlessBeanNoInterfaceViewBinder(Context jndiCtx, String jndiName, Class<?> beanClass, JBossSessionBean31MetaData beanMetaData)
    {
-      super(endPointCtx);
+      super(jndiCtx, jndiName, beanClass, beanMetaData);
    }
 
    /**
@@ -68,14 +67,13 @@ public class SessionlessNoInterfaceViewJNDIBinder extends AbstractNoInterfaceVie
     * @see JavassistNoInterfaceViewFactory#createView(java.lang.reflect.InvocationHandler, Class)
     */
    @Override
-   public String bindNoInterfaceView(Context jndiCtx, Class<?> beanClass, JBossSessionBean31MetaData beanMetaData)
-         throws NamingException, IllegalStateException
+   public void bind() throws NamingException
    {
-      // ensure no-interface view exists
-      this.ensureNoInterfaceViewExists(beanMetaData);
-
-
-      final AsyncMethodsMetaData asyncMethods = beanMetaData.getAsyncMethods();
+      if (this.endpointContext == null)
+      {
+         throw new IllegalStateException("KernelControllerContext hasn't been set for nointerface view binder of bean: " + this.beanClass);
+      }
+      final AsyncMethodsMetaData asyncMethods = this.sessionBeanMetaData.getAsyncMethods();
       InvocationHandler invocationHandler = new NoInterfaceViewInvocationHandler(this.endpointContext, null, beanClass,
             asyncMethods == null ? new AsyncMethodsMetaData() : asyncMethods);
 
@@ -88,14 +86,9 @@ public class SessionlessNoInterfaceViewJNDIBinder extends AbstractNoInterfaceVie
       {
          throw new RuntimeException("Could not create no-interface view for bean class: " + beanClass, e);
       }
-      // get no-interface view jndi name
-      String noInterfaceJndiName = this.getJNDINameResolver(beanMetaData).resolveNoInterfaceJNDIName(beanMetaData);
-      // log the no-interface view jndi binding info
-      this.prettyPrintJNDIBindingInfo(beanMetaData, noInterfaceJndiName);
+      this.prettyPrintJNDIBindingInfo();
       // bind to jndi
-      NonSerializableFactory.rebind(jndiCtx, noInterfaceJndiName, noInterfaceView, true);
-      
-      return noInterfaceJndiName;
+      NonSerializableFactory.rebind(this.jndiContext, this.noInterfaceViewJNDIName, noInterfaceView, true);
    }
 
    /**
@@ -104,14 +97,8 @@ public class SessionlessNoInterfaceViewJNDIBinder extends AbstractNoInterfaceVie
     * @see org.jboss.ejb3.nointerface.impl.jndi.NoInterfaceViewJNDIBinderFacade#unbindNoInterfaceView()
     */
    @Override
-   public void unbindNoInterfaceView(Context jndiCtx, Class<?> beanClass, JBossSessionBean31MetaData beanMetaData)
-         throws NamingException, IllegalStateException
+   public void unbind() throws NamingException
    {
-      // ensure no-interface view exists
-      this.ensureNoInterfaceViewExists(beanMetaData);
-
-      String noInterfaceJndiName = this.getJNDINameResolver(beanMetaData).resolveNoInterfaceJNDIName(beanMetaData);
-      jndiCtx.unbind(noInterfaceJndiName);
-
+      this.jndiContext.unbind(this.noInterfaceViewJNDIName);
    }
 }
