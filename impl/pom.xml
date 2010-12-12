@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jboss.ejb3.nointerface</groupId>
         <artifactId>jboss-ejb3-nointerface-aggregator</artifactId>
-        <version>1.0.0-alpha-11</version>
+        <version>1.0.0-alpha-12-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
